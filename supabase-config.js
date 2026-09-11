@@ -4,6 +4,6 @@
 // Secret / service_role anahtarını ASLA bu dosyaya koymayın.
 
 window.VALERA_SUPABASE = {
-  url: 'https://YOUR_PROJECT_REF.supabase.co',
-  publishableKey: 'sb_publishable_YOUR_KEY'
+  url: 'https://iczidgdfpirtltopvddx.supabase.co',
+  publishableKey: 'sb_publishable_nwUAvBU5k4NS8hB9cmNLHg__I_uNnMk
 };
