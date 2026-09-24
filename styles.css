@@ -50,3 +50,70 @@
 .airport-hint{padding:9px 14px;background:#f8f5ef;border-bottom:1px solid #eee9e1;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#9b8b72}
 .field-optional{font-style:normal;text-transform:none;letter-spacing:0;color:#a49c90;font-size:9px;margin-left:5px}
 @media(max-width:560px){.airport-suggestions{position:fixed;left:14px;right:14px;top:auto;max-height:45vh}.airport-suggestion{grid-template-columns:48px 1fr}.airport-country{display:none}}
+
+
+/* Hero quick request — interactive */
+.hero-quick-form{position:relative;overflow:visible}
+.quick-route-line{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+.quick-airport-field{display:block;min-width:0}
+.quick-airport-field-destination{text-align:right}
+.quick-airport-field small,.quick-meta-field small{display:block;color:#8e979f;font-size:10px;text-transform:uppercase;letter-spacing:.13em;margin-bottom:7px}
+.quick-airport-field input{
+  width:100%;
+  border:0;
+  border-bottom:1px solid transparent;
+  outline:none;
+  background:transparent;
+  color:#fff;
+  padding:4px 0 7px;
+  font:500 21px var(--font-display);
+  min-width:0;
+  transition:border-color .2s ease;
+}
+.quick-airport-field-destination input{text-align:right}
+.quick-airport-field input::placeholder{color:#fff;opacity:1}
+.quick-airport-field input:focus{border-bottom-color:var(--gold)}
+.quick-airport-field .airport-suggestions{text-align:left;min-width:320px}
+.quick-airport-field-destination .airport-suggestions{left:auto;right:0}
+.quick-flight-meta{align-items:end}
+.quick-meta-field{display:block;min-width:0}
+.quick-meta-field select,.quick-meta-field input{
+  width:100%;
+  min-width:0;
+  border:0;
+  border-bottom:1px solid rgba(255,255,255,.12);
+  outline:none;
+  background:transparent;
+  color:#fff;
+  padding:7px 18px 7px 0;
+  font:600 13px var(--font-body);
+  border-radius:0;
+}
+.quick-meta-field select{cursor:pointer}
+.quick-meta-field select option{color:#0a0d11;background:#fff}
+.quick-meta-field input[type="date"]{color-scheme:dark}
+.quick-meta-field input:focus,.quick-meta-field select:focus{border-bottom-color:var(--gold)}
+.quick-quote-btn{
+  width:100%;
+  border-left:0;
+  border-right:0;
+  border-bottom:0;
+  background:transparent;
+  cursor:pointer;
+  text-align:left;
+  font-family:var(--font-body);
+}
+.quick-quote-btn:hover{color:var(--gold)}
+.quick-form-error{
+  margin-top:12px;
+  color:#e6b7a8;
+  font-size:11px;
+  line-height:1.45;
+}
+@media(max-width:560px){
+  .quick-airport-field .airport-suggestions{min-width:0}
+  .quick-route-line{grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:9px}
+  .quick-airport-field input{font-size:17px}
+  .quick-flight-meta{grid-template-columns:1fr 1fr}
+  .quick-flight-meta .quick-meta-field:last-child{grid-column:1/-1}
+}
