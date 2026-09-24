@@ -189,6 +189,65 @@ function setupAirportAutocomplete(input, list){
 
 setupAirportAutocomplete(document.querySelector('input[name="from"]'), document.getElementById('originSuggestions'));
 setupAirportAutocomplete(document.querySelector('input[name="to"]'), document.getElementById('destinationSuggestions'));
+setupAirportAutocomplete(document.getElementById('quickFrom'), document.getElementById('quickOriginSuggestions'));
+setupAirportAutocomplete(document.getElementById('quickTo'), document.getElementById('quickDestinationSuggestions'));
+
+// Hero "Hızlı Talep" alanı: seçimleri ana teklif formuna aktarır.
+const quickFrom = document.getElementById('quickFrom');
+const quickTo = document.getElementById('quickTo');
+const quickTripType = document.getElementById('quickTripType');
+const quickPassengers = document.getElementById('quickPassengers');
+const quickDeparture = document.getElementById('quickDeparture');
+const quickQuoteBtn = document.getElementById('quickQuoteBtn');
+const quickFormError = document.getElementById('quickFormError');
+
+if (quickDeparture) quickDeparture.min = minDate;
+
+quickQuoteBtn?.addEventListener('click', () => {
+  const fromValue = String(quickFrom?.value || '').trim();
+  const toValue = String(quickTo?.value || '').trim();
+  const departureValue = String(quickDeparture?.value || '').trim();
+
+  if (!fromValue || !toValue || !departureValue) {
+    if (quickFormError) quickFormError.hidden = false;
+    return;
+  }
+
+  if (quickFormError) quickFormError.hidden = true;
+
+  const mainFrom = document.querySelector('input[name="from"]');
+  const mainTo = document.querySelector('input[name="to"]');
+  const mainPassengers = document.querySelector('input[name="passengers"]');
+  const mainDeparture = document.querySelector('input[name="departure"]');
+
+  if (mainFrom) {
+    mainFrom.value = fromValue;
+    mainFrom.dataset.iata = quickFrom?.dataset.iata || '';
+  }
+  if (mainTo) {
+    mainTo.value = toValue;
+    mainTo.dataset.iata = quickTo?.dataset.iata || '';
+  }
+  if (mainPassengers) mainPassengers.value = quickPassengers?.value || '4';
+  if (mainDeparture) {
+    mainDeparture.value = departureValue;
+    mainDeparture.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  const selectedTrip = quickTripType?.value || 'Tek Yön';
+  const matchingTripRadio = [...tripRadios].find(r => r.value === selectedTrip);
+  if (matchingTripRadio) {
+    matchingTripRadio.checked = true;
+    matchingTripRadio.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  showStep(0);
+  document.getElementById('teklif')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  setTimeout(() => {
+    document.querySelector('input[name="departureTime"]')?.focus({ preventScroll: true });
+  }, 650);
+});
 
 function getSupabaseConfig(){
   const config = window.VALERA_SUPABASE || {};
