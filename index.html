@@ -180,58 +180,107 @@
         </div>
 
 
-        <div class="hero-card reveal delay-1">
+        <div class="hero-card hero-quick-form reveal delay-1">
 
           <div class="live-chip">
             <span class="pulse"></span>
             Hızlı Talep
           </div>
 
-          <div class="route-line">
+          <div class="route-line quick-route-line">
 
-            <div>
+            <label class="quick-airport-field">
               <small>Nereden</small>
-              <strong>İstanbul</strong>
-              <span>IST / SAW</span>
-            </div>
+              <div class="airport-autocomplete">
+                <input
+                  id="quickFrom"
+                  type="text"
+                  placeholder="İstanbul / IST"
+                  autocomplete="off"
+                  aria-label="Kalkış havalimanı"
+                  aria-autocomplete="list"
+                  aria-expanded="false"
+                  aria-controls="quickOriginSuggestions"
+                >
+                <div
+                  class="airport-suggestions"
+                  id="quickOriginSuggestions"
+                  role="listbox"
+                ></div>
+              </div>
+            </label>
 
-            <div class="plane">
+            <div class="plane" aria-hidden="true">
               ✈
             </div>
 
-            <div>
+            <label class="quick-airport-field quick-airport-field-destination">
               <small>Nereye</small>
-              <strong>Londra</strong>
-              <span>LTN / FAB</span>
-            </div>
+              <div class="airport-autocomplete">
+                <input
+                  id="quickTo"
+                  type="text"
+                  placeholder="Londra / LTN"
+                  autocomplete="off"
+                  aria-label="Varış havalimanı"
+                  aria-autocomplete="list"
+                  aria-expanded="false"
+                  aria-controls="quickDestinationSuggestions"
+                >
+                <div
+                  class="airport-suggestions"
+                  id="quickDestinationSuggestions"
+                  role="listbox"
+                ></div>
+              </div>
+            </label>
 
           </div>
 
 
-          <div class="flight-meta">
+          <div class="flight-meta quick-flight-meta">
 
-            <div>
+            <label class="quick-meta-field">
               <small>Uçuş</small>
-              <strong>Tek Yön</strong>
-            </div>
+              <select id="quickTripType" aria-label="Uçuş tipi">
+                <option value="Tek Yön">Tek Yön</option>
+                <option value="Gidiş Dönüş">Gidiş Dönüş</option>
+              </select>
+            </label>
 
-            <div>
+            <label class="quick-meta-field">
               <small>Yolcu</small>
-              <strong>4 Kişi</strong>
-            </div>
+              <input
+                id="quickPassengers"
+                type="number"
+                min="1"
+                max="30"
+                value="4"
+                inputmode="numeric"
+                aria-label="Yolcu sayısı"
+              >
+            </label>
 
-            <div>
-              <small>Yanıt</small>
-              <strong>En kısa sürede</strong>
-            </div>
+            <label class="quick-meta-field">
+              <small>Tarih</small>
+              <input
+                id="quickDeparture"
+                type="date"
+                aria-label="Gidiş tarihi"
+              >
+            </label>
 
           </div>
 
 
-          <a href="#teklif" class="card-link">
-            Rotanıza özel fiyat isteyin
+          <button type="button" class="card-link quick-quote-btn" id="quickQuoteBtn">
+            <span>Rotanıza özel fiyat isteyin</span>
             <span>→</span>
-          </a>
+          </button>
+
+          <div class="quick-form-error" id="quickFormError" hidden>
+            Lütfen kalkış, varış ve tarih bilgilerini tamamlayın.
+          </div>
 
         </div>
 
