@@ -320,6 +320,272 @@ setupAirportAutocomplete(
   document.getElementById('destinationSuggestions')
 );
 
+// Conversational request helper — fills only fields we can identify confidently.
+const smartRequestText = document.getElementById('smartRequestText');
+const smartFillButton = document.getElementById('smartFillButton');
+const smartRequestStatus = document.getElementById('smartRequestStatus');
+const smartExample = document.getElementById('smartExample');
+
+const TR_MONTHS = {
+  ocak:0, subat:1, şubat:1, mart:2, nisan:3, mayis:4, mayıs:4, haziran:5,
+  temmuz:6, agustos:7, ağustos:7, eylul:8, eylül:8, ekim:9, kasim:10, kasım:10, aralik:11, aralık:11
+};
+
+function toISODate(date){
+  if(!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+  const y=date.getFullYear();
+  const m=String(date.getMonth()+1).padStart(2,'0');
+  const d=String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+
+function parseNaturalDate(text){
+  const raw=String(text||'');
+  const n=normalizeSearch(raw);
+  const now=new Date();
+
+  if(/\byarin\b/.test(n)){
+    const d=new Date(now); d.setDate(d.getDate()+1); return toISODate(d);
+  }
+  if(/\bbugun\b/.test(n)) return toISODate(now);
+
+  const numeric=raw.match(/\b(\d{1,2})[./-](\d{1,2})(?:[./-](\d{2,4}))?\b/);
+  if(numeric){
+    let day=Number(numeric[1]), month=Number(numeric[2])-1;
+    let year=numeric[3]?Number(numeric[3]):now.getFullYear();
+    if(year<100) year+=2000;
+    const d=new Date(year,month,day);
+    if(d.getFullYear()===year && d.getMonth()===month && d.getDate()===day) return toISODate(d);
+  }
+
+  const monthPattern='ocak|şubat|subat|mart|nisan|mayıs|mayis|haziran|temmuz|ağustos|agustos|eylül|eylul|ekim|kasım|kasim|aralık|aralik';
+  const named=raw.toLocaleLowerCase('tr-TR').match(new RegExp('\\b(\\d{1,2})\\s+('+monthPattern+')(?:\\s+(\\d{4}))?\\b','i'));
+  if(named){
+    const day=Number(named[1]);
+    const month=TR_MONTHS[normalizeSearch(named[2])];
+    let year=named[3]?Number(named[3]):now.getFullYear();
+    let d=new Date(year,month,day);
+    if(!named[3] && d < new Date(now.getFullYear(), now.getMonth(), now.getDate())) {
+      d=new Date(year+1,month,day);
+    }
+    return toISODate(d);
+  }
+
+  return '';
+}
+
+function parseNaturalTime(text){
+  const raw=String(text||'').toLocaleLowerCase('tr-TR');
+
+  const explicit=raw.match(/(?:saat\s*)?(\d{1,2})[:.](\d{2})\b/);
+  if(explicit){
+    let h=Number(explicit[1]), m=Number(explicit[2]);
+    if(h>=0 && h<=23 && (m===0 || m===30)){
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    }
+    // Round only to supported half-hour values.
+    if(h>=0 && h<=23 && m>=0 && m<=59){
+      if(m<15) m=0;
+      else if(m<45) m=30;
+      else { m=0; h=(h+1)%24; }
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    }
+  }
+
+  const hourOnly=raw.match(/(?:saat\s+)(\d{1,2})\b/);
+  if(hourOnly){
+    const h=Number(hourOnly[1]);
+    if(h>=0 && h<=23) return `${String(h).padStart(2,'0')}:00`;
+  }
+
+  return '';
+}
+
+function findAirportMention(fragment){
+  const q=normalizeSearch(fragment);
+  if(!q) return null;
+
+  const direct=airports.find(a => normalizeSearch(a.code)===q);
+  if(direct) return direct;
+
+  const scored=airports.map(a=>{
+    const city=normalizeSearch(a.city);
+    const name=normalizeSearch(a.name);
+    const code=normalizeSearch(a.code);
+    let score=0;
+    if(q.includes(code)) score+=100;
+    if(q.includes(city)) score+=70;
+    if(q.includes(name)) score+=80;
+    if(city.includes(q) || q.includes(city)) score+=30;
+    if(name.includes(q) || q.includes(name)) score+=25;
+    return {a,score};
+  }).filter(x=>x.score>0).sort((x,y)=>y.score-x.score);
+
+  return scored[0]?.a || null;
+}
+
+function parseRoute(text){
+  const raw=String(text||'').trim();
+
+  // Turkish: "Miami'den Dubai'ye", "İstanbuldan Londraya"
+  const turkish=raw.match(/(.+?)(?:'?(?:dan|den|tan|ten))\s+(.+?)(?:'?(?:ya|ye|a|e))(?=\s|,|\.|$)/i);
+  if(turkish){
+    const from=findAirportMention(turkish[1]);
+    const to=findAirportMention(turkish[2]);
+    if(from || to) return {from,to};
+  }
+
+  // Arrow / "to": "MIA -> DXB", "Miami to Dubai"
+  const arrow=raw.match(/(.+?)\s*(?:→|->|\bto\b)\s*(.+?)(?=,|\.|$)/i);
+  if(arrow){
+    return {from:findAirportMention(arrow[1]),to:findAirportMention(arrow[2])};
+  }
+
+  // Fallback: first two distinct airport/city mentions in text.
+  const normalized=normalizeSearch(raw);
+  const found=[];
+  airports.forEach(a=>{
+    const city=normalizeSearch(a.city);
+    const code=normalizeSearch(a.code);
+    const name=normalizeSearch(a.name);
+    let pos=-1;
+    for(const key of [code,city,name]){
+      const i=normalized.indexOf(key);
+      if(i>=0 && (pos<0 || i<pos)) pos=i;
+    }
+    if(pos>=0) found.push({a,pos});
+  });
+  found.sort((x,y)=>x.pos-y.pos);
+  const unique=[];
+  for(const x of found){
+    if(!unique.some(u=>u.a.code===x.a.code)) unique.push(x);
+  }
+  return {from:unique[0]?.a||null,to:unique[1]?.a||null};
+}
+
+function parseSmartRequest(text){
+  const normalized=normalizeSearch(text);
+  const route=parseRoute(text);
+
+  let passengers=null;
+  const paxMatch=normalized.match(/\b(\d{1,2})\s*(?:kisi|kisilik|pax|yolcu)\b/);
+  if(paxMatch){
+    const n=Number(paxMatch[1]);
+    if(n>=1 && n<=30) passengers=n;
+  }
+
+  let tripType='';
+  if(/gidiş\s*dönüş|gidis\s*donus|round\s*trip/.test(normalized)) tripType='Gidiş Dönüş';
+  else if(/tek\s*yön|tek\s*yon|one\s*way/.test(normalized)) tripType='Tek Yön';
+
+  let jetType='';
+  if(/heavy\s*jet|agir\s*jet|ağır\s*jet/.test(normalized)) jetType='Heavy Jet';
+  else if(/midsize\s*jet|orta\s*boy/.test(normalized)) jetType='Midsize Jet';
+  else if(/light\s*jet|hafif\s*jet/.test(normalized)) jetType='Light Jet';
+
+  return {
+    from: route.from,
+    to: route.to,
+    passengers,
+    tripType,
+    departureDate: parseNaturalDate(text),
+    departureTime: parseNaturalTime(text),
+    jetType
+  };
+}
+
+function setSelectValue(select,value){
+  if(!select || !value) return false;
+  const option=[...select.options].find(o=>o.value===value);
+  if(!option) return false;
+  select.value=value;
+  return true;
+}
+
+function fillFormFromSmartRequest(){
+  const text=String(smartRequestText?.value||'').trim();
+
+  if(!text){
+    if(smartRequestStatus) smartRequestStatus.textContent='Önce uçuş talebinizi birkaç cümleyle yazın.';
+    smartRequestText?.focus();
+    return;
+  }
+
+  const parsed=parseSmartRequest(text);
+  let filled=0;
+  const missing=[];
+
+  const fromInput=form?.querySelector('input[name="from"]');
+  const toInput=form?.querySelector('input[name="to"]');
+  const departureInput=form?.querySelector('input[name="departure"]');
+  const passengersInput=form?.querySelector('input[name="passengers"]');
+  const timeSelect=form?.querySelector('select[name="departureTime"]');
+  const jetSelect=form?.querySelector('select[name="jetType"]');
+
+  if(parsed.from && fromInput){
+    fromInput.value=airportLabel(parsed.from);
+    fromInput.dataset.iata=parsed.from.code;
+    filled++;
+  } else missing.push('kalkış');
+
+  if(parsed.to && toInput){
+    toInput.value=airportLabel(parsed.to);
+    toInput.dataset.iata=parsed.to.code;
+    filled++;
+  } else missing.push('varış');
+
+  if(parsed.departureDate && departureInput){
+    departureInput.value=parsed.departureDate;
+    departureInput.dispatchEvent(new Event('change',{bubbles:true}));
+    filled++;
+  } else missing.push('tarih');
+
+  if(parsed.departureTime && timeSelect && setSelectValue(timeSelect,parsed.departureTime)){
+    filled++;
+  }
+
+  if(parsed.passengers && passengersInput){
+    passengersInput.value=String(parsed.passengers);
+    filled++;
+  } else missing.push('yolcu');
+
+  if(parsed.tripType){
+    const radio=[...tripRadios].find(r=>r.value===parsed.tripType);
+    if(radio){
+      radio.checked=true;
+      radio.dispatchEvent(new Event('change',{bubbles:true}));
+      filled++;
+    }
+  }
+
+  if(parsed.jetType && jetSelect && setSelectValue(jetSelect,parsed.jetType)){
+    filled++;
+  }
+
+  if(smartRequestStatus){
+    smartRequestStatus.textContent = missing.length
+      ? `${filled} alan dolduruldu. ${missing.join(', ')} bilgisini aşağıdan tamamlayabilirsiniz.`
+      : `${filled} alan dolduruldu. Bilgileri kontrol edip talebi gönderebilirsiniz.`;
+  }
+
+  document.querySelector('.single-form-section')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+smartFillButton?.addEventListener('click',fillFormFromSmartRequest);
+
+smartRequestText?.addEventListener('keydown',e=>{
+  if((e.ctrlKey || e.metaKey) && e.key==='Enter'){
+    e.preventDefault();
+    fillFormFromSmartRequest();
+  }
+});
+
+smartExample?.addEventListener('click',()=>{
+  if(!smartRequestText) return;
+  smartRequestText.value="Miami'den Dubai'ye 5 kişi, 18 Ekim saat 14:30, tek yön. Heavy Jet tercih ederim.";
+  smartRequestText.focus();
+});
+
 function getSupabaseConfig() {
   const config = window.VALERA_SUPABASE || {};
 
