@@ -54,9 +54,9 @@ tripRadios.forEach(r => r.addEventListener('change', () => {
   }
 }));
 
-// Native airport suggestions — reliable on mobile and desktop.
+// Airport autocomplete — custom UI for desktop and mobile.
 const airports = Array.isArray(window.VALERA_AIRPORTS) ? window.VALERA_AIRPORTS : [];
-const airportOptions = document.getElementById('airportOptions');
+const popularAirportCodes = ['IST','SAW','BJV','DLM','AYT','ADB','ESB','LTN','FAB','LBG','NCE','GVA','LIN','JMK','DXB','DWC'];
 
 function normalizeSearch(value) {
   return String(value || '')
@@ -71,56 +71,254 @@ function airportLabel(a) {
   return `${a.city} — ${a.name} (${a.code})`;
 }
 
-if (airportOptions) {
-  const fragment = document.createDocumentFragment();
+function searchAirports(query) {
+  const q = normalizeSearch(query);
 
-  airports.forEach(a => {
-    const option = document.createElement('option');
-    option.value = airportLabel(a);
-    option.label = `${a.code} · ${a.city} · ${a.country}`;
-    fragment.appendChild(option);
-  });
+  if (!q) {
+    return popularAirportCodes
+      .map(code => airports.find(a => a.code === code))
+      .filter(Boolean)
+      .slice(0, 8);
+  }
 
-  airportOptions.appendChild(fragment);
+  if (q.length < 2) return [];
+
+  return airports
+    .map(a => {
+      const code = normalizeSearch(a.code);
+      const city = normalizeSearch(a.city);
+      const name = normalizeSearch(a.name);
+      const country = normalizeSearch(a.country);
+
+      let score = 0;
+
+      if (code === q) score += 120;
+      else if (code.startsWith(q)) score += 95;
+
+      if (city === q) score += 85;
+      else if (city.startsWith(q)) score += 65;
+      else if (city.includes(q)) score += 40;
+
+      if (name.startsWith(q)) score += 35;
+      else if (name.includes(q)) score += 20;
+
+      if (country.includes(q)) score += 5;
+
+      return { airport: a, score };
+    })
+    .filter(x => x.score > 0)
+    .sort((a,b) => b.score - a.score || a.airport.city.localeCompare(b.airport.city, 'tr'))
+    .slice(0, 8)
+    .map(x => x.airport);
 }
 
 function resolveAirportInput(input) {
-  if (!input) return;
+  if (!input) return null;
 
   const raw = String(input.value || '').trim();
   if (!raw) {
     input.dataset.iata = '';
-    return;
+    return null;
   }
 
   const q = normalizeSearch(raw);
 
-  let match = airports.find(a =>
+  const exact = airports.find(a =>
     normalizeSearch(a.code) === q ||
     normalizeSearch(airportLabel(a)) === q
   );
 
-  // If the user typed a unique airport name, format it automatically.
-  if (!match) {
-    const matches = airports.filter(a =>
-      normalizeSearch(a.name) === q ||
-      normalizeSearch(`${a.city} ${a.name}`) === q
-    );
-    if (matches.length === 1) match = matches[0];
+  if (exact) {
+    input.value = airportLabel(exact);
+    input.dataset.iata = exact.code;
+    return exact;
   }
 
-  if (match) {
-    input.value = airportLabel(match);
-    input.dataset.iata = match.code;
-  } else {
-    input.dataset.iata = '';
+  const unique = airports.filter(a =>
+    normalizeSearch(a.name) === q ||
+    normalizeSearch(`${a.city} ${a.name}`) === q
+  );
+
+  if (unique.length === 1) {
+    input.value = airportLabel(unique[0]);
+    input.dataset.iata = unique[0].code;
+    return unique[0];
   }
+
+  input.dataset.iata = '';
+  return null;
 }
 
-document.querySelectorAll('input[list="airportOptions"]').forEach(input => {
-  input.addEventListener('change', () => resolveAirportInput(input));
-  input.addEventListener('blur', () => resolveAirportInput(input));
-});
+function setupAirportAutocomplete(input, list) {
+  if (!input || !list) return;
+
+  let currentItems = [];
+  let activeIndex = -1;
+  let isSelecting = false;
+
+  const isMobile = () =>
+    window.matchMedia('(max-width: 700px), (pointer: coarse)').matches;
+
+  const close = () => {
+    list.classList.remove('open');
+    input.setAttribute('aria-expanded', 'false');
+    activeIndex = -1;
+  };
+
+  const choose = airport => {
+    if (!airport) return;
+
+    isSelecting = true;
+    input.value = airportLabel(airport);
+    input.dataset.iata = airport.code;
+    input.setAttribute('aria-expanded', 'false');
+    list.classList.remove('open');
+
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // Keep keyboard behavior natural on mobile after selection.
+    if (isMobile()) input.blur();
+
+    window.setTimeout(() => {
+      isSelecting = false;
+    }, 60);
+  };
+
+  const render = () => {
+    currentItems = searchAirports(input.value);
+    activeIndex = -1;
+    list.innerHTML = '';
+
+    const hint = document.createElement('div');
+    hint.className = 'airport-hint';
+    hint.textContent = input.value.trim()
+      ? 'Havalimanı seçenekleri'
+      : 'Popüler özel jet havalimanları';
+    list.appendChild(hint);
+
+    if (!currentItems.length) {
+      const empty = document.createElement('div');
+      empty.className = 'airport-empty';
+      empty.textContent = 'Eşleşme bulunamadı. Şehir, havalimanı adı veya IATA kodu yazın.';
+      list.appendChild(empty);
+    } else {
+      currentItems.forEach((airport, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'airport-suggestion';
+        button.setAttribute('role', 'option');
+        button.setAttribute('aria-label', `${airport.city}, ${airport.name}, ${airport.code}`);
+        button.dataset.index = String(index);
+
+        button.innerHTML = `
+          <span class="airport-code">${airport.code}</span>
+          <span class="airport-main">
+            <strong>${airport.city}</strong>
+            <small>${airport.name}</small>
+          </span>
+          <span class="airport-country">${airport.country}</span>
+        `;
+
+        const selectNow = e => {
+          e.preventDefault();
+          e.stopPropagation();
+          choose(airport);
+        };
+
+        // pointerdown works for mouse, touch and pen before input blur fires.
+        button.addEventListener('pointerdown', selectNow);
+        button.addEventListener('touchstart', selectNow, { passive: false });
+        button.addEventListener('click', selectNow);
+
+        list.appendChild(button);
+      });
+    }
+
+    list.classList.add('open');
+    input.setAttribute('aria-expanded', 'true');
+
+    if (isMobile()) {
+      document.body.classList.add('airport-picker-open');
+    }
+  };
+
+  const reallyClose = () => {
+    close();
+    document.body.classList.remove('airport-picker-open');
+  };
+
+  input.addEventListener('focus', render);
+
+  input.addEventListener('input', () => {
+    if (isSelecting) return;
+    input.dataset.iata = '';
+    render();
+  });
+
+  input.addEventListener('blur', () => {
+    window.setTimeout(() => {
+      if (isSelecting) return;
+      resolveAirportInput(input);
+      reallyClose();
+    }, isMobile() ? 320 : 160);
+  });
+
+  input.addEventListener('keydown', e => {
+    const buttons = [...list.querySelectorAll('.airport-suggestion')];
+
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !list.classList.contains('open')) {
+      render();
+    }
+
+    if (e.key === 'Escape') {
+      reallyClose();
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      const chosen =
+        activeIndex >= 0
+          ? currentItems[activeIndex]
+          : currentItems.length === 1
+            ? currentItems[0]
+            : resolveAirportInput(input);
+
+      if (chosen) {
+        e.preventDefault();
+        choose(chosen);
+      }
+      return;
+    }
+
+    if (!buttons.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % buttons.length;
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIndex = (activeIndex - 1 + buttons.length) % buttons.length;
+    } else {
+      return;
+    }
+
+    buttons.forEach((button, index) => {
+      button.classList.toggle('active', index === activeIndex);
+    });
+
+    buttons[activeIndex]?.scrollIntoView({ block: 'nearest' });
+  });
+}
+
+setupAirportAutocomplete(
+  document.querySelector('input[name="from"]'),
+  document.getElementById('originSuggestions')
+);
+
+setupAirportAutocomplete(
+  document.querySelector('input[name="to"]'),
+  document.getElementById('destinationSuggestions')
+);
 
 function getSupabaseConfig() {
   const config = window.VALERA_SUPABASE || {};
