@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <!-- CookieYes Consent Banner -->
-  <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/f6e0e3132f2277a491e76fe6/script.js?v=airport-autocomplete-3"></script>
+  <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/f6e0e3132f2277a491e76fe6/script.js?v=smart-request-1"></script>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M8W1NW3FCB"></script>
@@ -32,7 +32,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=airport-autocomplete-3" />
+  <link rel="stylesheet" href="styles.css?v=smart-request-1" />
 
   <style>
     /* Direct WhatsApp button */
@@ -507,6 +507,39 @@
           </label>
 
           <div class="single-form-content">
+
+            <div class="smart-request">
+              <div class="smart-request-top">
+                <div>
+                  <small>HIZLI TALEP</small>
+                  <h3>Uçuşunuzu bize anlatın.</h3>
+                  <p>Normal konuşur gibi yazın. Anladığımız bilgileri forma otomatik yerleştirelim.</p>
+                </div>
+                <span class="smart-request-badge">Akıllı form</span>
+              </div>
+
+              <div class="smart-example" id="smartExample">
+                Örn. Miami’den Dubai’ye 5 kişi, 18 Ekim saat 14:30, tek yön. Heavy Jet tercih ederim.
+              </div>
+
+              <textarea
+                id="smartRequestText"
+                rows="4"
+                placeholder="Örn. İstanbul’dan Londra’ya yarın 4 kişi uçacağız. Saat 10:30 civarı, tek yön."
+                aria-label="Uçuş talebinizi doğal dille yazın"
+              ></textarea>
+
+              <div class="smart-request-actions">
+                <div class="smart-request-status" id="smartRequestStatus">
+                  Rota, tarih, saat, yolcu sayısı ve uçuş tipini yazabilirsiniz.
+                </div>
+
+                <button type="button" class="btn btn-dark" id="smartFillButton">
+                  Formu Doldur
+                  <span>→</span>
+                </button>
+              </div>
+            </div>
 
             <div class="form-head single-form-head">
               <small>TEK FORM</small>
