@@ -1,3 +1,28 @@
+const currentLang = (document.documentElement.lang || 'tr').slice(0,2).toLowerCase();
+const UI = {
+  tr:{
+    airportOptions:'Havalimanı seçenekleri',popularAirports:'Popüler özel jet havalimanları',airportNoMatch:'Eşleşme bulunamadı. Şehir, havalimanı adı veya IATA kodu yazın.',
+    smartEmpty:'Önce uçuş talebinizi birkaç cümleyle yazın.',filled:'alan dolduruldu.',completeBelow:'bilgisini aşağıdan tamamlayabilirsiniz.',review:'Bilgileri kontrol edip talebi gönderebilirsiniz.',
+    missing:{from:'kalkış',to:'varış',date:'tarih',pax:'yolcu'},configError:'Form bağlantısı henüz yapılandırılmadı. Lütfen daha sonra tekrar deneyin.',submitError:'Talebiniz şu anda gönderilemedi. Lütfen birkaç dakika sonra tekrar deneyin.',sending:'Gönderiliyor...'
+  },
+  en:{
+    airportOptions:'Airport options',popularAirports:'Popular private aviation airports',airportNoMatch:'No match found. Try a city, airport name or IATA code.',
+    smartEmpty:'First, describe your flight in a sentence or two.',filled:'fields filled.',completeBelow:'can be completed in the form below.',review:'Review the details below and send your request.',
+    missing:{from:'departure',to:'destination',date:'date',pax:'passenger count'},configError:'The request form is temporarily unavailable. Please try again shortly.',submitError:'We could not send your request right now. Please try again in a few minutes.',sending:'Sending...'
+  },
+  de:{
+    airportOptions:'Flughafenoptionen',popularAirports:'Beliebte Business-Aviation-Flughäfen',airportNoMatch:'Kein Treffer. Versuchen Sie Stadt, Flughafenname oder IATA-Code.',
+    smartEmpty:'Beschreiben Sie zuerst Ihren Flug in ein oder zwei Sätzen.',filled:'Felder ausgefüllt.',completeBelow:'können Sie unten im Formular ergänzen.',review:'Prüfen Sie die Angaben und senden Sie anschließend Ihre Anfrage.',
+    missing:{from:'Abflug',to:'Ziel',date:'Datum',pax:'Passagierzahl'},configError:'Das Anfrageformular ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.',submitError:'Ihre Anfrage konnte gerade nicht gesendet werden. Bitte versuchen Sie es in einigen Minuten erneut.',sending:'Wird gesendet...'
+  },
+  fr:{
+    airportOptions:'Aéroports proposés',popularAirports:'Aéroports populaires en aviation privée',airportNoMatch:'Aucun résultat. Essayez une ville, un aéroport ou un code IATA.',
+    smartEmpty:'Décrivez d’abord votre vol en une ou deux phrases.',filled:'champs complétés.',completeBelow:'peuvent être complétés dans le formulaire ci-dessous.',review:'Vérifiez les informations puis envoyez votre demande.',
+    missing:{from:'départ',to:'destination',date:'date',pax:'nombre de passagers'},configError:'Le formulaire est momentanément indisponible. Veuillez réessayer dans quelques instants.',submitError:'Votre demande n’a pas pu être envoyée. Veuillez réessayer dans quelques minutes.',sending:'Envoi...'
+  }
+};
+const ui = UI[currentLang] || UI.en;
+
 const menuBtn = document.querySelector('.menu-btn');
 const mobileMenu = document.querySelector('.mobile-menu');
 
@@ -54,6 +79,58 @@ tripRadios.forEach(r => r.addEventListener('change', () => {
   }
 }));
 
+const CITY_I18N = {
+  londra:{en:'London',de:'London',fr:'Londres'},
+  milano:{en:'Milan',de:'Mailand',fr:'Milan'},
+  cenevre:{en:'Geneva',de:'Genf',fr:'Genève'},
+  munih:{en:'Munich',de:'München',fr:'Munich'},
+  viyana:{en:'Vienna',de:'Wien',fr:'Vienne'},
+  bruksel:{en:'Brussels',de:'Brüssel',fr:'Bruxelles'},
+  atina:{en:'Athens',de:'Athen',fr:'Athènes'},
+  moskova:{en:'Moscow',de:'Moskau',fr:'Moscou'},
+  zurih:{en:'Zurich',de:'Zürich',fr:'Zurich'},
+  kopenhag:{en:'Copenhagen',de:'Kopenhagen',fr:'Copenhague'},
+  lizbon:{en:'Lisbon',de:'Lissabon',fr:'Lisbonne'},
+  varsova:{en:'Warsaw',de:'Warschau',fr:'Varsovie'},
+  prag:{en:'Prague',de:'Prag',fr:'Prague'},
+  budapeste:{en:'Budapest',de:'Budapest',fr:'Budapest'},
+  belgrad:{en:'Belgrade',de:'Belgrad',fr:'Belgrade'},
+  bukres:{en:'Bucharest',de:'Bukarest',fr:'Bucarest'}
+};
+const COUNTRY_I18N = {
+  turkiye:{en:'Turkey',de:'Türkei',fr:'Turquie'},
+  almanya:{en:'Germany',de:'Deutschland',fr:'Allemagne'},
+  fransa:{en:'France',de:'Frankreich',fr:'France'},
+  italya:{en:'Italy',de:'Italien',fr:'Italie'},
+  ispanya:{en:'Spain',de:'Spanien',fr:'Espagne'},
+  isvicre:{en:'Switzerland',de:'Schweiz',fr:'Suisse'},
+  avusturya:{en:'Austria',de:'Österreich',fr:'Autriche'},
+  belcika:{en:'Belgium',de:'Belgien',fr:'Belgique'},
+  hollanda:{en:'Netherlands',de:'Niederlande',fr:'Pays-Bas'},
+  yunanistan:{en:'Greece',de:'Griechenland',fr:'Grèce'},
+  'birlesik krallik':{en:'United Kingdom',de:'Vereinigtes Königreich',fr:'Royaume-Uni'},
+  'birlesik arap emirlikleri':{en:'United Arab Emirates',de:'Vereinigte Arabische Emirate',fr:'Émirats arabes unis'},
+  abd:{en:'United States',de:'USA',fr:'États-Unis'}
+};
+function localizedCity(a){
+  const key=normalizeSearch(a.city);
+  return CITY_I18N[key]?.[currentLang] || a.city;
+}
+function localizedCountry(a){
+  const key=normalizeSearch(a.country);
+  return COUNTRY_I18N[key]?.[currentLang] || a.country;
+}
+function airportTerms(a){
+  return [...new Set([
+    normalizeSearch(a.code),
+    normalizeSearch(a.city),
+    normalizeSearch(localizedCity(a)),
+    normalizeSearch(a.name),
+    normalizeSearch(a.country),
+    normalizeSearch(localizedCountry(a))
+  ].filter(Boolean))];
+}
+
 // Airport autocomplete — custom UI for desktop and mobile.
 const airports = Array.isArray(window.VALERA_AIRPORTS) ? window.VALERA_AIRPORTS : [];
 const popularAirportCodes = ['IST','SAW','BJV','DLM','AYT','ADB','ESB','LTN','FAB','LBG','NCE','GVA','LIN','JMK','DXB','DWC'];
@@ -68,7 +145,7 @@ function normalizeSearch(value) {
 }
 
 function airportLabel(a) {
-  return `${a.city} — ${a.name} (${a.code})`;
+  return `${localizedCity(a)} — ${a.name} (${a.code})`;
 }
 
 function searchAirports(query) {
@@ -87,27 +164,31 @@ function searchAirports(query) {
     .map(a => {
       const code = normalizeSearch(a.code);
       const city = normalizeSearch(a.city);
+      const localCity = normalizeSearch(localizedCity(a));
       const name = normalizeSearch(a.name);
       const country = normalizeSearch(a.country);
+      const localCountry = normalizeSearch(localizedCountry(a));
 
       let score = 0;
 
       if (code === q) score += 120;
       else if (code.startsWith(q)) score += 95;
 
-      if (city === q) score += 85;
-      else if (city.startsWith(q)) score += 65;
-      else if (city.includes(q)) score += 40;
+      for (const cityTerm of [city, localCity]) {
+        if (cityTerm === q) score += 85;
+        else if (cityTerm.startsWith(q)) score += 65;
+        else if (cityTerm.includes(q)) score += 40;
+      }
 
       if (name.startsWith(q)) score += 35;
       else if (name.includes(q)) score += 20;
 
-      if (country.includes(q)) score += 5;
+      if (country.includes(q) || localCountry.includes(q)) score += 5;
 
       return { airport: a, score };
     })
     .filter(x => x.score > 0)
-    .sort((a,b) => b.score - a.score || a.airport.city.localeCompare(b.airport.city, 'tr'))
+    .sort((a,b) => b.score - a.score || localizedCity(a.airport).localeCompare(localizedCity(b.airport), currentLang))
     .slice(0, 8)
     .map(x => x.airport);
 }
@@ -192,14 +273,14 @@ function setupAirportAutocomplete(input, list) {
     const hint = document.createElement('div');
     hint.className = 'airport-hint';
     hint.textContent = input.value.trim()
-      ? 'Havalimanı seçenekleri'
-      : 'Popüler özel jet havalimanları';
+      ? ui.airportOptions
+      : ui.popularAirports;
     list.appendChild(hint);
 
     if (!currentItems.length) {
       const empty = document.createElement('div');
       empty.className = 'airport-empty';
-      empty.textContent = 'Eşleşme bulunamadı. Şehir, havalimanı adı veya IATA kodu yazın.';
+      empty.textContent = ui.airportNoMatch;
       list.appendChild(empty);
     } else {
       currentItems.forEach((airport, index) => {
@@ -216,7 +297,7 @@ function setupAirportAutocomplete(input, list) {
             <strong>${airport.city}</strong>
             <small>${airport.name}</small>
           </span>
-          <span class="airport-country">${airport.country}</span>
+          <span class="airport-country">${localizedCountry(airport)}</span>
         `;
 
         const selectNow = e => {
@@ -326,9 +407,19 @@ const smartFillButton = document.getElementById('smartFillButton');
 const smartRequestStatus = document.getElementById('smartRequestStatus');
 const smartExample = document.getElementById('smartExample');
 
-const TR_MONTHS = {
-  ocak:0, subat:1, şubat:1, mart:2, nisan:3, mayis:4, mayıs:4, haziran:5,
-  temmuz:6, agustos:7, ağustos:7, eylul:8, eylül:8, ekim:9, kasim:10, kasım:10, aralik:11, aralık:11
+const MONTHS = {
+  ocak:0,january:0,januar:0,janvier:0,
+  subat:1,şubat:1,february:1,februar:1,fevrier:1,
+  mart:2,march:2,marz:2,märz:2,mars:2,
+  nisan:3,april:3,avril:3,
+  mayis:4,mayıs:4,may:4,mai:4,
+  haziran:5,june:5,juni:5,juin:5,
+  temmuz:6,july:6,juli:6,juillet:6,
+  agustos:7,ağustos:7,august:7,aout:7,août:7,
+  eylul:8,eylül:8,september:8,septembre:8,
+  ekim:9,october:9,oktober:9,octobre:9,
+  kasim:10,kasım:10,november:10,novembre:10,
+  aralik:11,aralık:11,december:11,dezember:11,decembre:11,décembre:11
 };
 
 function toISODate(date){
@@ -344,10 +435,10 @@ function parseNaturalDate(text){
   const n=normalizeSearch(raw);
   const now=new Date();
 
-  if(/\byarin\b/.test(n)){
+  if(/\b(yarin|tomorrow|morgen|demain)\b/.test(n)){
     const d=new Date(now); d.setDate(d.getDate()+1); return toISODate(d);
   }
-  if(/\bbugun\b/.test(n)) return toISODate(now);
+  if(/\b(bugun|today|heute|aujourd'hui|aujourdhui)\b/.test(n)) return toISODate(now);
 
   const numeric=raw.match(/\b(\d{1,2})[./-](\d{1,2})(?:[./-](\d{2,4}))?\b/);
   if(numeric){
@@ -358,32 +449,37 @@ function parseNaturalDate(text){
     if(d.getFullYear()===year && d.getMonth()===month && d.getDate()===day) return toISODate(d);
   }
 
-  const monthPattern='ocak|şubat|subat|mart|nisan|mayıs|mayis|haziran|temmuz|ağustos|agustos|eylül|eylul|ekim|kasım|kasim|aralık|aralik';
-  const named=raw.toLocaleLowerCase('tr-TR').match(new RegExp('\\b(\\d{1,2})\\s+('+monthPattern+')(?:\\s+(\\d{4}))?\\b','i'));
-  if(named){
-    const day=Number(named[1]);
-    const month=TR_MONTHS[normalizeSearch(named[2])];
-    let year=named[3]?Number(named[3]):now.getFullYear();
+  const namedDM=n.match(/\b(\d{1,2})\.?\s+([a-z]+)(?:\s+(\d{4}))?\b/);
+  if(namedDM && MONTHS[namedDM[2]]!==undefined){
+    const day=Number(namedDM[1]);
+    const month=MONTHS[namedDM[2]];
+    let year=namedDM[3]?Number(namedDM[3]):now.getFullYear();
     let d=new Date(year,month,day);
-    if(!named[3] && d < new Date(now.getFullYear(), now.getMonth(), now.getDate())) {
-      d=new Date(year+1,month,day);
-    }
+    if(!namedDM[3] && d < new Date(now.getFullYear(),now.getMonth(),now.getDate())) d=new Date(year+1,month,day);
+    return toISODate(d);
+  }
+
+  const namedMD=n.match(/\b([a-z]+)\s+(\d{1,2})(?:,?\s+(\d{4}))?\b/);
+  if(namedMD && MONTHS[namedMD[1]]!==undefined){
+    const month=MONTHS[namedMD[1]];
+    const day=Number(namedMD[2]);
+    let year=namedMD[3]?Number(namedMD[3]):now.getFullYear();
+    let d=new Date(year,month,day);
+    if(!namedMD[3] && d < new Date(now.getFullYear(),now.getMonth(),now.getDate())) d=new Date(year+1,month,day);
     return toISODate(d);
   }
 
   return '';
 }
-
 function parseNaturalTime(text){
-  const raw=String(text||'').toLocaleLowerCase('tr-TR');
+  const raw=normalizeSearch(text);
 
-  const explicit=raw.match(/(?:saat\s*)?(\d{1,2})[:.](\d{2})\b/);
+  const explicit=raw.match(/\b(\d{1,2})(?::|\.|h)(\d{2})\s*(am|pm)?\b/);
   if(explicit){
     let h=Number(explicit[1]), m=Number(explicit[2]);
-    if(h>=0 && h<=23 && (m===0 || m===30)){
-      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    }
-    // Round only to supported half-hour values.
+    const ap=explicit[3];
+    if(ap==='pm' && h<12) h+=12;
+    if(ap==='am' && h===12) h=0;
     if(h>=0 && h<=23 && m>=0 && m<=59){
       if(m<15) m=0;
       else if(m<45) m=30;
@@ -392,15 +488,17 @@ function parseNaturalTime(text){
     }
   }
 
-  const hourOnly=raw.match(/(?:saat\s+)(\d{1,2})\b/);
+  const hourOnly=raw.match(/(?:saat|at|um|vers|a)\s+(\d{1,2})\s*(am|pm)?\b/);
   if(hourOnly){
-    const h=Number(hourOnly[1]);
+    let h=Number(hourOnly[1]);
+    const ap=hourOnly[2];
+    if(ap==='pm' && h<12) h+=12;
+    if(ap==='am' && h===12) h=0;
     if(h>=0 && h<=23) return `${String(h).padStart(2,'0')}:00`;
   }
 
   return '';
 }
-
 function findAirportMention(fragment){
   const q=normalizeSearch(fragment);
   if(!q) return null;
@@ -409,15 +507,14 @@ function findAirportMention(fragment){
   if(direct) return direct;
 
   const scored=airports.map(a=>{
-    const city=normalizeSearch(a.city);
-    const name=normalizeSearch(a.name);
-    const code=normalizeSearch(a.code);
+    const terms=airportTerms(a);
     let score=0;
-    if(q.includes(code)) score+=100;
-    if(q.includes(city)) score+=70;
-    if(q.includes(name)) score+=80;
-    if(city.includes(q) || q.includes(city)) score+=30;
-    if(name.includes(q) || q.includes(name)) score+=25;
+    for(const term of terms){
+      if(!term) continue;
+      if(q===term) score=Math.max(score,120);
+      else if(q.includes(term)) score=Math.max(score,80);
+      else if(term.includes(q) && q.length>=3) score=Math.max(score,35);
+    }
     return {a,score};
   }).filter(x=>x.score>0).sort((x,y)=>y.score-x.score);
 
@@ -427,30 +524,29 @@ function findAirportMention(fragment){
 function parseRoute(text){
   const raw=String(text||'').trim();
 
-  // Turkish: "Miami'den Dubai'ye", "İstanbuldan Londraya"
-  const turkish=raw.match(/(.+?)(?:'?(?:dan|den|tan|ten))\s+(.+?)(?:'?(?:ya|ye|a|e))(?=\s|,|\.|$)/i);
-  if(turkish){
-    const from=findAirportMention(turkish[1]);
-    const to=findAirportMention(turkish[2]);
-    if(from || to) return {from,to};
+  const patterns=[
+    /(.+?)(?:'?(?:dan|den|tan|ten))\s+(.+?)(?:'?(?:ya|ye|a|e))(?=\s|,|\.|$)/i,
+    /\bfrom\s+(.+?)\s+to\s+(.+?)(?=,|\.|\bon\b|\bat\b|\bfor\b|$)/i,
+    /\bvon\s+(.+?)\s+nach\s+(.+?)(?=,|\.|\bam\b|\bum\b|\bfur\b|\bfür\b|$)/i,
+    /\bde\s+(.+?)\s+(?:a|à|vers)\s+(.+?)(?=,|\.|\ble\b|\ba\b|\bà\b|\bpour\b|$)/i,
+    /(.+?)\s*(?:→|->)\s*(.+?)(?=,|\.|$)/i
+  ];
+
+  for(const pattern of patterns){
+    const match=raw.match(pattern);
+    if(match){
+      const from=findAirportMention(match[1]);
+      const to=findAirportMention(match[2]);
+      if(from || to) return {from,to};
+    }
   }
 
-  // Arrow / "to": "MIA -> DXB", "Miami to Dubai"
-  const arrow=raw.match(/(.+?)\s*(?:→|->|\bto\b)\s*(.+?)(?=,|\.|$)/i);
-  if(arrow){
-    return {from:findAirportMention(arrow[1]),to:findAirportMention(arrow[2])};
-  }
-
-  // Fallback: first two distinct airport/city mentions in text.
   const normalized=normalizeSearch(raw);
   const found=[];
   airports.forEach(a=>{
-    const city=normalizeSearch(a.city);
-    const code=normalizeSearch(a.code);
-    const name=normalizeSearch(a.name);
     let pos=-1;
-    for(const key of [code,city,name]){
-      const i=normalized.indexOf(key);
+    for(const term of airportTerms(a)){
+      const i=normalized.indexOf(term);
       if(i>=0 && (pos<0 || i<pos)) pos=i;
     }
     if(pos>=0) found.push({a,pos});
@@ -462,21 +558,20 @@ function parseRoute(text){
   }
   return {from:unique[0]?.a||null,to:unique[1]?.a||null};
 }
-
 function parseSmartRequest(text){
   const normalized=normalizeSearch(text);
   const route=parseRoute(text);
 
   let passengers=null;
-  const paxMatch=normalized.match(/\b(\d{1,2})\s*(?:kisi|kisilik|pax|yolcu)\b/);
+  const paxMatch=normalized.match(/\b(\d{1,2})\s*(?:kisi|kisilik|pax|yolcu|people|persons?|passengers?|personen|passagiere?|personnes?|passagers?)\b/);
   if(paxMatch){
     const n=Number(paxMatch[1]);
     if(n>=1 && n<=30) passengers=n;
   }
 
   let tripType='';
-  if(/gidiş\s*dönüş|gidis\s*donus|round\s*trip/.test(normalized)) tripType='Gidiş Dönüş';
-  else if(/tek\s*yön|tek\s*yon|one\s*way/.test(normalized)) tripType='Tek Yön';
+  if(/gidis\s*donus|round\s*trip|return\s*flight|hin\s*und\s*zuruck|hin\s*und\s*ruck|aller[ -]?retour/.test(normalized)) tripType='Gidiş Dönüş';
+  else if(/tek\s*yon|one\s*way|nur\s*hinflug|einfacher\s*flug|aller\s*simple/.test(normalized)) tripType='Tek Yön';
 
   let jetType='';
   if(/heavy\s*jet|agir\s*jet|ağır\s*jet/.test(normalized)) jetType='Heavy Jet';
@@ -506,7 +601,7 @@ function fillFormFromSmartRequest(){
   const text=String(smartRequestText?.value||'').trim();
 
   if(!text){
-    if(smartRequestStatus) smartRequestStatus.textContent='Önce uçuş talebinizi birkaç cümleyle yazın.';
+    if(smartRequestStatus) smartRequestStatus.textContent=ui.smartEmpty;
     smartRequestText?.focus();
     return;
   }
@@ -526,19 +621,19 @@ function fillFormFromSmartRequest(){
     fromInput.value=airportLabel(parsed.from);
     fromInput.dataset.iata=parsed.from.code;
     filled++;
-  } else missing.push('kalkış');
+  } else missing.push(ui.missing.from);
 
   if(parsed.to && toInput){
     toInput.value=airportLabel(parsed.to);
     toInput.dataset.iata=parsed.to.code;
     filled++;
-  } else missing.push('varış');
+  } else missing.push(ui.missing.to);
 
   if(parsed.departureDate && departureInput){
     departureInput.value=parsed.departureDate;
     departureInput.dispatchEvent(new Event('change',{bubbles:true}));
     filled++;
-  } else missing.push('tarih');
+  } else missing.push(ui.missing.date);
 
   if(parsed.departureTime && timeSelect && setSelectValue(timeSelect,parsed.departureTime)){
     filled++;
@@ -547,7 +642,7 @@ function fillFormFromSmartRequest(){
   if(parsed.passengers && passengersInput){
     passengersInput.value=String(parsed.passengers);
     filled++;
-  } else missing.push('yolcu');
+  } else missing.push(ui.missing.pax);
 
   if(parsed.tripType){
     const radio=[...tripRadios].find(r=>r.value===parsed.tripType);
@@ -564,8 +659,8 @@ function fillFormFromSmartRequest(){
 
   if(smartRequestStatus){
     smartRequestStatus.textContent = missing.length
-      ? `${filled} alan dolduruldu. ${missing.join(', ')} bilgisini aşağıdan tamamlayabilirsiniz.`
-      : `${filled} alan dolduruldu. Bilgileri kontrol edip talebi gönderebilirsiniz.`;
+      ? `${filled} ${ui.filled} ${missing.join(', ')} ${ui.completeBelow}`
+      : `${filled} ${ui.filled} ${ui.review}`;
   }
 
   document.querySelector('.single-form-section')?.scrollIntoView({behavior:'smooth',block:'start'});
@@ -582,7 +677,13 @@ smartRequestText?.addEventListener('keydown',e=>{
 
 smartExample?.addEventListener('click',()=>{
   if(!smartRequestText) return;
-  smartRequestText.value="Miami'den Dubai'ye 5 kişi, 18 Ekim saat 14:30, tek yön. Heavy Jet tercih ederim.";
+  const examples={
+    tr:"Miami'den Dubai'ye 5 kişi, 18 Ekim saat 14:30, tek yön. Heavy Jet tercih ederim.",
+    en:"Miami to Dubai for 5 passengers on 18 October at 14:30, one way. Heavy Jet preferred.",
+    de:"Von München nach Paris, 5 Personen, am 18. Oktober um 14:30 Uhr, nur Hinflug. Heavy Jet bevorzugt.",
+    fr:"De Paris à Genève, 5 passagers, le 18 octobre à 14:30, aller simple. Heavy Jet de préférence."
+  };
+  smartRequestText.value=examples[currentLang]||examples.en;
   smartRequestText.focus();
 });
 
@@ -628,7 +729,7 @@ form?.addEventListener('submit', async e => {
   const config = getSupabaseConfig();
 
   if (!config) {
-    showError('Form bağlantısı henüz yapılandırılmadı. Lütfen daha sonra tekrar deneyin.');
+    showError(ui.configError);
     console.error('Supabase configuration is missing. Check supabase-config.js.');
     return;
   }
@@ -637,7 +738,7 @@ form?.addEventListener('submit', async e => {
   const originalButtonHtml = submitButton.innerHTML;
 
   submitButton.disabled = true;
-  submitButton.textContent = 'Gönderiliyor...';
+  submitButton.textContent = ui.sending;
 
   if (formError) formError.hidden = true;
 
@@ -665,7 +766,7 @@ form?.addEventListener('submit', async e => {
     phone: String(fd.get('phone') || '').trim(),
     email: String(fd.get('email') || '').trim().toLowerCase(),
     consent: fd.get('kvkk') === 'on',
-    source: 'valerajets.com',
+    source: currentLang==='tr' ? 'valerajets.com' : `valerajets.com/${currentLang}`,
     status: 'new'
   };
 
@@ -698,7 +799,7 @@ form?.addEventListener('submit', async e => {
     showSuccess();
   } catch (error) {
     console.error('Valera Jets lead submit failed:', error);
-    showError('Talebiniz şu anda gönderilemedi. Lütfen birkaç dakika sonra tekrar deneyin.');
+    showError(ui.submitError);
   } finally {
     submitButton.disabled = false;
     submitButton.innerHTML = originalButtonHtml;
