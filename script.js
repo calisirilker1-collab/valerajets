@@ -111,6 +111,9 @@ function setupAirportAutocomplete(input, list){
   if (!input || !list) return;
   let items = [];
   let activeIndex = -1;
+  let selecting = false;
+
+  const isMobile = () => window.matchMedia('(max-width: 560px), (pointer: coarse)').matches;
 
   const close = () => {
     list.classList.remove('open');
@@ -119,10 +122,24 @@ function setupAirportAutocomplete(input, list){
   };
 
   const select = airport => {
+    if (!airport) return;
+    selecting = true;
     input.value = airportLabel(airport);
     input.dataset.iata = airport.code;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
     close();
+    window.setTimeout(() => { selecting = false; }, 0);
+  };
+
+  const exactMatch = () => {
+    const raw = String(input.value || '').trim();
+    if (!raw) return null;
+    const q = normalizeSearch(raw);
+    return airports.find(a =>
+      normalizeSearch(a.code) === q ||
+      normalizeSearch(airportLabel(a)) === q
+    ) || null;
   };
 
   const render = () => {
@@ -146,41 +163,80 @@ function setupAirportAutocomplete(input, list){
         button.type = 'button';
         button.className = 'airport-suggestion';
         button.setAttribute('role', 'option');
+        button.dataset.index = String(index);
         button.innerHTML = `<span class="airport-code">${airport.code}</span><span class="airport-main"><strong>${airport.city}</strong><small>${airport.name}</small></span><span class="airport-country">${airport.country}</span>`;
+
+        // Desktop: prevent blur before click. Mobile: choose immediately on touch/pointer down.
+        button.addEventListener('pointerdown', e => {
+          e.preventDefault();
+          select(airport);
+        });
         button.addEventListener('mousedown', e => e.preventDefault());
-        button.addEventListener('click', () => select(airport));
+        button.addEventListener('click', e => {
+          e.preventDefault();
+          if (!selecting) select(airport);
+        });
+
         list.appendChild(button);
       });
     }
 
     list.classList.add('open');
     input.setAttribute('aria-expanded', 'true');
+
+    // On mobile keep the active field visible above the on-screen keyboard.
+    if (isMobile()) {
+      window.setTimeout(() => {
+        input.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }, 80);
+    }
   };
 
   input.addEventListener('focus', render);
+
   input.addEventListener('input', () => {
-    input.dataset.iata = '';
-    render();
+    // Do not wipe the IATA we just set during a programmatic selection.
+    if (!selecting) input.dataset.iata = '';
+    if (!selecting) render();
   });
-  input.addEventListener('blur', () => setTimeout(close, 120));
+
+  input.addEventListener('blur', () => {
+    window.setTimeout(() => {
+      if (selecting) return;
+      const match = exactMatch();
+      if (match) {
+        input.value = airportLabel(match);
+        input.dataset.iata = match.code;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      close();
+    }, isMobile() ? 260 : 140);
+  });
+
   input.addEventListener('keydown', e => {
     const buttons = [...list.querySelectorAll('.airport-suggestion')];
     if (!list.classList.contains('open') && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) render();
     if (!buttons.length) return;
+
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       activeIndex = (activeIndex + 1) % buttons.length;
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       activeIndex = (activeIndex - 1 + buttons.length) % buttons.length;
-    } else if (e.key === 'Enter' && activeIndex >= 0) {
-      e.preventDefault();
-      select(items[activeIndex]);
+    } else if (e.key === 'Enter') {
+      const chosen = activeIndex >= 0 ? items[activeIndex] : (items.length === 1 ? items[0] : exactMatch());
+      if (chosen) {
+        e.preventDefault();
+        select(chosen);
+      }
       return;
     } else if (e.key === 'Escape') {
       close();
       return;
-    } else return;
+    } else {
+      return;
+    }
 
     buttons.forEach((b,i) => b.classList.toggle('active', i === activeIndex));
     buttons[activeIndex]?.scrollIntoView({ block: 'nearest' });
