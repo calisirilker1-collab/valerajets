@@ -17,12 +17,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#070a0e" />
-  <meta
-    name="description"
-    content="Valera Jets ile özel jet kiralama taleplerinizi tek noktadan yönetin. Avrupa, Orta Doğu ve global rotalarda size uygun jet seçeneklerini karşılaştırın, hızlı teklif alın."
-  />
+  <meta name="description" content="Valera Jets ile özel jet kiralama taleplerinizi tek noktadan yönetin. Avrupa, Orta Doğu ve global rotalarda size uygun jet seçeneklerini karşılaştırın, hızlı teklif alın." />
 
   <title>Valera Jets | Özel Jet Kiralama</title>
+  <link rel="canonical" href="https://valerajets.com/">
+  <link rel="alternate" hreflang="tr" href="https://valerajets.com/">
+  <link rel="alternate" hreflang="en" href="https://valerajets.com/en/">
+  <link rel="alternate" hreflang="de" href="https://valerajets.com/de/">
+  <link rel="alternate" hreflang="fr" href="https://valerajets.com/fr/">
+  <link rel="alternate" hreflang="x-default" href="https://valerajets.com/en/">
+
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +36,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=smart-request-1" />
+  <link rel="stylesheet" href="styles.css?v=i18n-1" />
 
   <style>
     /* Direct WhatsApp button */
@@ -110,6 +114,14 @@
         <a href="#jetler">Jet Seçenekleri</a>
         <a href="empty-leg.html">Empty Leg</a>
         <a href="#hakkimizda">Hakkımızda</a>
+      </div>
+      <div class="language-picker">
+        <select class="language-select" aria-label="Language" onchange="if(this.value) window.location.href=this.value">
+          <option value="/" selected>TR</option>
+          <option value="/en/" >EN</option>
+          <option value="/de/" >DE</option>
+          <option value="/fr/" >FR</option>
+        </select>
       </div>
 
       <a class="btn btn-outline nav-cta" href="#teklif">
@@ -840,7 +852,7 @@
 
   <script src="supabase-config.js"></script>
   <script src="airports.js"></script>
-  <script src="script.js?v=mobile-airport-2"></script>
+  <script src="script.js?v=i18n-1"></script>
 
 
   <!-- DIRECT WHATSAPP BUTTON -->
