@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <!-- CookieYes Consent Banner -->
-  <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/f6e0e3132f2277a491e76fe6/script.js"></script>
+  <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/f6e0e3132f2277a491e76fe6/script.js?v=single-form-1"></script>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M8W1NW3FCB"></script>
@@ -32,7 +32,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=mobile-airport-2" />
+  <link rel="stylesheet" href="styles.css?v=single-form-1" />
 
   <style>
     /* Direct WhatsApp button */
@@ -180,110 +180,31 @@
         </div>
 
 
-        <div class="hero-card hero-quick-form reveal delay-1">
+        <div class="hero-card hero-card-static reveal delay-1">
 
           <div class="live-chip">
             <span class="pulse"></span>
-            Hızlı Talep
+            TEK FORM · HIZLI TALEP
           </div>
 
-          <div class="route-line quick-route-line">
-
-            <label class="quick-airport-field">
-              <small>Nereden</small>
-              <div class="airport-autocomplete">
-                <input
-                  id="quickFrom"
-                  type="text"
-                  placeholder="İstanbul / IST"
-                  autocomplete="off"
-                  aria-label="Kalkış havalimanı"
-                  aria-autocomplete="list"
-                  aria-expanded="false"
-                  aria-controls="quickOriginSuggestions"
-                >
-                <div
-                  class="airport-suggestions"
-                  id="quickOriginSuggestions"
-                  role="listbox"
-                ></div>
-              </div>
-            </label>
-
-            <div class="plane" aria-hidden="true">
-              ✈
-            </div>
-
-            <label class="quick-airport-field quick-airport-field-destination">
-              <small>Nereye</small>
-              <div class="airport-autocomplete">
-                <input
-                  id="quickTo"
-                  type="text"
-                  placeholder="Londra / LTN"
-                  autocomplete="off"
-                  aria-label="Varış havalimanı"
-                  aria-autocomplete="list"
-                  aria-expanded="false"
-                  aria-controls="quickDestinationSuggestions"
-                >
-                <div
-                  class="airport-suggestions"
-                  id="quickDestinationSuggestions"
-                  role="listbox"
-                ></div>
-              </div>
-            </label>
-
+          <div class="static-card-copy">
+            <small>Özel jet talebinizi tek noktadan oluşturun</small>
+            <h3>Rota, tarih ve iletişim bilgilerinizi tek formda paylaşın.</h3>
+            <p>Talebinizi aldıktan sonra uygun operatör ve uçak alternatiflerini sizin için araştırmaya başlarız.</p>
           </div>
 
-
-          <div class="flight-meta quick-flight-meta">
-
-            <label class="quick-meta-field">
-              <small>Uçuş</small>
-              <select id="quickTripType" aria-label="Uçuş tipi">
-                <option value="Tek Yön">Tek Yön</option>
-                <option value="Gidiş Dönüş">Gidiş Dönüş</option>
-              </select>
-            </label>
-
-            <label class="quick-meta-field">
-              <small>Yolcu</small>
-              <input
-                id="quickPassengers"
-                type="number"
-                min="1"
-                max="30"
-                value="4"
-                inputmode="numeric"
-                aria-label="Yolcu sayısı"
-              >
-            </label>
-
-            <label class="quick-meta-field">
-              <small>Tarih</small>
-              <input
-                id="quickDeparture"
-                type="date"
-                aria-label="Gidiş tarihi"
-              >
-            </label>
-
+          <div class="static-card-points">
+            <span>✓ Rota & tarih</span>
+            <span>✓ Yolcu & uçak tercihi</span>
+            <span>✓ İletişim bilgileri</span>
           </div>
 
-
-          <button type="button" class="card-link quick-quote-btn" id="quickQuoteBtn">
-            <span>Rotanıza özel fiyat isteyin</span>
+          <a href="#teklif" class="card-link">
+            Tek formu doldurun
             <span>→</span>
-          </button>
-
-          <div class="quick-form-error" id="quickFormError" hidden>
-            Lütfen kalkış, varış ve tarih bilgilerini tamamlayın.
-          </div>
+          </a>
 
         </div>
-
       </div>
 
 
@@ -690,468 +611,173 @@
           </div>
 
           <h2>
-            Rotanızı yazın.<br>
-            <i>Gerisini biz takip edelim.</i>
+            Tek form.<br>
+            <i>Hızlı teklif süreci.</i>
           </h2>
 
           <p>
-            Formu doldurun, size uygun uçuş alternatiflerini
-            araştırmaya başlayalım.
+            Rota, tarih, tercih ve iletişim bilgilerinizi tek ekranda paylaşın.
+            Uygun özel jet alternatiflerini araştırmaya başlayalım.
           </p>
 
-
           <div class="quote-points">
-
-            <span>
-              ✓ Ücretsiz ön talep
-            </span>
-
-            <span>
-              ✓ Bağlayıcı değildir
-            </span>
-
-            <span>
-              ✓ Hızlı geri dönüş
-            </span>
-
+            <span>✓ Ücretsiz ön talep</span>
+            <span>✓ Bağlayıcı değildir</span>
+            <span>✓ Hızlı geri dönüş</span>
           </div>
 
         </div>
 
+        <form class="quote-form single-quote-form reveal delay-1" id="quoteForm">
 
-        <form
-          class="quote-form reveal delay-1"
-          id="quoteForm"
-          novalidate
-        >
-
-          <label
-            class="hp-field"
-            aria-hidden="true"
-          >
+          <label class="hp-field" aria-hidden="true">
             Website
-
-            <input
-              name="website"
-              tabindex="-1"
-              autocomplete="off"
-            >
+            <input name="website" tabindex="-1" autocomplete="off">
           </label>
 
+          <div class="single-form-content">
 
-          <div class="form-progress">
-            <span class="active"></span>
-            <span></span>
-            <span></span>
-          </div>
-
-
-          <div
-            class="form-step active"
-            data-step="1"
-          >
-
-            <div class="form-head">
-
-              <small>
-                ADIM 1 / 3
-              </small>
-
-              <h3>
-                Uçuş bilgileri
-              </h3>
-
+            <div class="form-head single-form-head">
+              <small>TEK FORM</small>
+              <h3>Uçuş ve iletişim bilgileri</h3>
+              <p>Tüm alanları tek ekranda tamamlayabilirsiniz.</p>
             </div>
 
+            <div class="single-form-section">
+              <div class="single-form-section-title">Uçuş Bilgileri</div>
 
-            <div class="trip-toggle">
+              <div class="trip-toggle">
+                <label>
+                  <input type="radio" name="tripType" value="Tek Yön" checked>
+                  <span>Tek Yön</span>
+                </label>
+                <label>
+                  <input type="radio" name="tripType" value="Gidiş Dönüş">
+                  <span>Gidiş Dönüş</span>
+                </label>
+              </div>
 
-              <label>
-
-                <input
-                  type="radio"
-                  name="tripType"
-                  value="Tek Yön"
-                  checked
-                >
-
-                <span>
-                  Tek Yön
-                </span>
-
-              </label>
-
-
-              <label>
-
-                <input
-                  type="radio"
-                  name="tripType"
-                  value="Gidiş Dönüş"
-                >
-
-                <span>
-                  Gidiş Dönüş
-                </span>
-
-              </label>
-
-            </div>
-
-
-            <div class="field-grid">
-
-              <label class="field airport-field">
-
-                <span>
-                  Nereden
-                </span>
-
-                <div class="airport-autocomplete">
-
+              <div class="field-grid">
+                <label class="field">
+                  <span>Nereden</span>
                   <input
                     name="from"
                     required
+                    list="airportOptions"
+                    inputmode="search"
                     placeholder="Şehir, havalimanı veya IATA kodu"
                     autocomplete="off"
-                    aria-autocomplete="list"
-                    aria-expanded="false"
-                    aria-controls="originSuggestions"
                   >
+                </label>
 
-                  <div
-                    class="airport-suggestions"
-                    id="originSuggestions"
-                    role="listbox"
-                  ></div>
-
-                </div>
-
-              </label>
-
-
-              <label class="field airport-field">
-
-                <span>
-                  Nereye
-                </span>
-
-                <div class="airport-autocomplete">
-
+                <label class="field">
+                  <span>Nereye</span>
                   <input
                     name="to"
                     required
+                    list="airportOptions"
+                    inputmode="search"
                     placeholder="Şehir, havalimanı veya IATA kodu"
                     autocomplete="off"
-                    aria-autocomplete="list"
-                    aria-expanded="false"
-                    aria-controls="destinationSuggestions"
                   >
+                </label>
 
-                  <div
-                    class="airport-suggestions"
-                    id="destinationSuggestions"
-                    role="listbox"
-                  ></div>
+                <label class="field">
+                  <span>Gidiş tarihi</span>
+                  <input name="departure" required type="date">
+                </label>
 
-                </div>
+                <label class="field return-field hidden">
+                  <span>Dönüş tarihi</span>
+                  <input name="returnDate" type="date">
+                </label>
 
-              </label>
+                <label class="field">
+                  <span>Tercih edilen kalkış saati <em class="field-optional">Opsiyonel</em></span>
+                  <input name="departureTime" type="time" step="900">
+                </label>
 
-
-              <label class="field">
-
-                <span>
-                  Gidiş tarihi
-                </span>
-
-                <input
-                  name="departure"
-                  required
-                  type="date"
-                >
-
-              </label>
-
-
-              <label class="field return-field hidden">
-
-                <span>
-                  Dönüş tarihi
-                </span>
-
-                <input
-                  name="returnDate"
-                  type="date"
-                >
-
-              </label>
-
-
-              <label class="field">
-
-                <span>
-                  Tercih edilen kalkış saati
-                  <em class="field-optional">
-                    Opsiyonel
-                  </em>
-                </span>
-
-                <input
-                  name="departureTime"
-                  type="time"
-                  step="900"
-                >
-
-              </label>
-
-
-              <label class="field">
-
-                <span>
-                  Yolcu sayısı
-                </span>
-
-                <input
-                  name="passengers"
-                  required
-                  type="number"
-                  min="1"
-                  max="30"
-                  value="2"
-                >
-
-              </label>
-
+                <label class="field">
+                  <span>Yolcu sayısı</span>
+                  <input name="passengers" required type="number" min="1" max="30" value="2">
+                </label>
+              </div>
             </div>
 
+            <div class="single-form-section">
+              <div class="single-form-section-title">Tercihler</div>
 
-            <button
-              type="button"
-              class="btn btn-primary form-next"
-            >
-              Devam Et
-              <span>→</span>
-            </button>
+              <div class="field-grid">
+                <label class="field">
+                  <span>Uçak tercihi</span>
+                  <select name="jetType">
+                    <option>Farketmez / En uygun seçenek</option>
+                    <option>Light Jet</option>
+                    <option>Midsize Jet</option>
+                    <option>Heavy Jet</option>
+                  </select>
+                </label>
 
-          </div>
-
-
-          <div
-            class="form-step"
-            data-step="2"
-          >
-
-            <div class="form-head">
-
-              <small>
-                ADIM 2 / 3
-              </small>
-
-              <h3>
-                Tercihleriniz
-              </h3>
-
+                <label class="field">
+                  <span>Özel talepler <em class="field-optional">Opsiyonel</em></span>
+                  <input name="notes" placeholder="Evcil hayvan, bagaj, ikram, transfer vb.">
+                </label>
+              </div>
             </div>
 
+            <div class="single-form-section">
+              <div class="single-form-section-title">İletişim Bilgileri</div>
 
-            <div class="field-grid one-col">
+              <div class="field-grid">
+                <label class="field">
+                  <span>Ad Soyad</span>
+                  <input name="name" required autocomplete="name" placeholder="Adınız Soyadınız">
+                </label>
 
-              <label class="field">
+                <label class="field">
+                  <span>Telefon</span>
+                  <input name="phone" required type="tel" inputmode="tel" autocomplete="tel" placeholder="+90 5xx xxx xx xx">
+                </label>
 
+                <label class="field full">
+                  <span>E-posta</span>
+                  <input name="email" required type="email" autocomplete="email" placeholder="ornek@email.com">
+                </label>
+              </div>
+
+              <label class="check">
+                <input type="checkbox" required name="kvkk">
                 <span>
-                  Uçak tercihi
+                  İletişim bilgilerimin uçuş talebimin değerlendirilmesi amacıyla işlenmesini kabul ediyorum.
                 </span>
-
-                <select name="jetType">
-                  <option>Farketmez / En uygun seçenek</option>
-                  <option>Light Jet</option>
-                  <option>Midsize Jet</option>
-                  <option>Heavy Jet</option>
-                </select>
-
               </label>
-
-
-              <label class="field">
-
-                <span>
-                  Özel talepler
-                </span>
-
-                <textarea
-                  name="notes"
-                  rows="5"
-                  placeholder="Evcil hayvan, özel bagaj, ikram, transfer vb."
-                ></textarea>
-
-              </label>
-
             </div>
 
-
-            <div class="form-actions">
-
-              <button
-                type="button"
-                class="btn btn-ghost form-back"
-              >
-                ← Geri
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-primary form-next"
-              >
-                Devam Et
-                <span>→</span>
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div
-            class="form-step"
-            data-step="3"
-          >
-
-            <div class="form-head">
-
-              <small>
-                ADIM 3 / 3
-              </small>
-
-              <h3>
-                İletişim bilgileriniz
-              </h3>
-
-            </div>
-
-
-            <div class="field-grid">
-
-              <label class="field">
-
-                <span>
-                  Ad Soyad
-                </span>
-
-                <input
-                  name="name"
-                  required
-                  placeholder="Adınız Soyadınız"
-                >
-
-              </label>
-
-
-              <label class="field">
-
-                <span>
-                  Telefon
-                </span>
-
-                <input
-                  name="phone"
-                  required
-                  placeholder="+90 5xx xxx xx xx"
-                >
-
-              </label>
-
-
-              <label class="field full">
-
-                <span>
-                  E-posta
-                </span>
-
-                <input
-                  name="email"
-                  required
-                  type="email"
-                  placeholder="ornek@email.com"
-                >
-
-              </label>
-
-            </div>
-
-
-            <label class="check">
-
-              <input
-                type="checkbox"
-                required
-                name="kvkk"
-              >
-
-              <span>
-                İletişim bilgilerimin uçuş talebimin değerlendirilmesi
-                amacıyla işlenmesini kabul ediyorum.
-              </span>
-
-            </label>
-
-
-            <div class="form-actions">
-
-              <button
-                type="button"
-                class="btn btn-ghost form-back"
-              >
-                ← Geri
-              </button>
-
-              <button
-                type="submit"
-                class="btn btn-primary"
-              >
+            <div class="single-form-submit">
+              <div>
+                <small>Talebiniz ücretsizdir ve bağlayıcı değildir.</small>
+              </div>
+              <button type="submit" class="btn btn-primary">
                 Talebi Gönder
                 <span>↗</span>
               </button>
-
             </div>
+
+            <div class="form-error" role="alert" hidden></div>
 
           </div>
 
-
-          <div
-            class="form-error"
-            role="alert"
-            hidden
-          ></div>
-
-
-          <div
-            class="form-success"
-            hidden
-          >
-
-            <div class="success-icon">
-              ✓
-            </div>
-
-            <h3>
-              Uçuş talebiniz alındı.
-            </h3>
-
+          <div class="form-success" hidden>
+            <div class="success-icon">✓</div>
+            <h3>Uçuş talebiniz alındı.</h3>
             <p>
               Talebiniz Valera Jets ekibine ulaştı.
-              Uçuş alternatiflerini değerlendirdikten sonra sizinle
-              en kısa sürede iletişime geçeceğiz.
+              Uçuş alternatiflerini değerlendirdikten sonra sizinle en kısa sürede iletişime geçeceğiz.
             </p>
-
-            <button
-              type="button"
-              class="btn btn-outline reset-form"
-            >
-              Yeni Talep
-            </button>
-
+            <button type="button" class="btn btn-outline reset-form">Yeni Talep</button>
           </div>
+
+          <datalist id="airportOptions"></datalist>
 
         </form>
 
