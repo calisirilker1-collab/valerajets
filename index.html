@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <!-- CookieYes Consent Banner -->
-  <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/f6e0e3132f2277a491e76fe6/script.js?v=single-form-1"></script>
+  <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/f6e0e3132f2277a491e76fe6/script.js?v=airport-autocomplete-3"></script>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M8W1NW3FCB"></script>
@@ -32,7 +32,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=empty-leg-page-1" />
+  <link rel="stylesheet" href="styles.css?v=airport-autocomplete-3" />
 
   <style>
     /* Direct WhatsApp button */
@@ -529,28 +529,38 @@
               </div>
 
               <div class="field-grid">
-                <label class="field">
+                <label class="field airport-field">
                   <span>Nereden</span>
-                  <input
-                    name="from"
-                    required
-                    list="airportOptions"
-                    inputmode="search"
-                    placeholder="Şehir, havalimanı veya IATA kodu"
-                    autocomplete="off"
-                  >
+                  <div class="airport-autocomplete">
+                    <input
+                      name="from"
+                      required
+                      inputmode="search"
+                      placeholder="Şehir, havalimanı veya IATA kodu"
+                      autocomplete="off"
+                      aria-autocomplete="list"
+                      aria-expanded="false"
+                      aria-controls="originSuggestions"
+                    >
+                    <div class="airport-suggestions" id="originSuggestions" role="listbox"></div>
+                  </div>
                 </label>
 
-                <label class="field">
+                <label class="field airport-field">
                   <span>Nereye</span>
-                  <input
-                    name="to"
-                    required
-                    list="airportOptions"
-                    inputmode="search"
-                    placeholder="Şehir, havalimanı veya IATA kodu"
-                    autocomplete="off"
-                  >
+                  <div class="airport-autocomplete">
+                    <input
+                      name="to"
+                      required
+                      inputmode="search"
+                      placeholder="Şehir, havalimanı veya IATA kodu"
+                      autocomplete="off"
+                      aria-autocomplete="list"
+                      aria-expanded="false"
+                      aria-controls="destinationSuggestions"
+                    >
+                    <div class="airport-suggestions" id="destinationSuggestions" role="listbox"></div>
+                  </div>
                 </label>
 
                 <label class="field">
@@ -565,7 +575,57 @@
 
                 <label class="field">
                   <span>Tercih edilen kalkış saati <em class="field-optional">Opsiyonel</em></span>
-                  <input name="departureTime" type="time" step="900">
+                  <select name="departureTime" aria-label="Tercih edilen kalkış saati">
+                    <option value="">Farketmez</option>
+                    <option value="00:00">00:00</option>
+                    <option value="00:30">00:30</option>
+                    <option value="01:00">01:00</option>
+                    <option value="01:30">01:30</option>
+                    <option value="02:00">02:00</option>
+                    <option value="02:30">02:30</option>
+                    <option value="03:00">03:00</option>
+                    <option value="03:30">03:30</option>
+                    <option value="04:00">04:00</option>
+                    <option value="04:30">04:30</option>
+                    <option value="05:00">05:00</option>
+                    <option value="05:30">05:30</option>
+                    <option value="06:00">06:00</option>
+                    <option value="06:30">06:30</option>
+                    <option value="07:00">07:00</option>
+                    <option value="07:30">07:30</option>
+                    <option value="08:00">08:00</option>
+                    <option value="08:30">08:30</option>
+                    <option value="09:00">09:00</option>
+                    <option value="09:30">09:30</option>
+                    <option value="10:00">10:00</option>
+                    <option value="10:30">10:30</option>
+                    <option value="11:00">11:00</option>
+                    <option value="11:30">11:30</option>
+                    <option value="12:00">12:00</option>
+                    <option value="12:30">12:30</option>
+                    <option value="13:00">13:00</option>
+                    <option value="13:30">13:30</option>
+                    <option value="14:00">14:00</option>
+                    <option value="14:30">14:30</option>
+                    <option value="15:00">15:00</option>
+                    <option value="15:30">15:30</option>
+                    <option value="16:00">16:00</option>
+                    <option value="16:30">16:30</option>
+                    <option value="17:00">17:00</option>
+                    <option value="17:30">17:30</option>
+                    <option value="18:00">18:00</option>
+                    <option value="18:30">18:30</option>
+                    <option value="19:00">19:00</option>
+                    <option value="19:30">19:30</option>
+                    <option value="20:00">20:00</option>
+                    <option value="20:30">20:30</option>
+                    <option value="21:00">21:00</option>
+                    <option value="21:30">21:30</option>
+                    <option value="22:00">22:00</option>
+                    <option value="22:30">22:30</option>
+                    <option value="23:00">23:00</option>
+                    <option value="23:30">23:30</option>
+                  </select>
                 </label>
 
                 <label class="field">
@@ -647,8 +707,6 @@
             </p>
             <button type="button" class="btn btn-outline reset-form">Yeni Talep</button>
           </div>
-
-          <datalist id="airportOptions"></datalist>
 
         </form>
 
