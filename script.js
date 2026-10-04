@@ -766,7 +766,7 @@ form?.addEventListener('submit', async e => {
     phone: String(fd.get('phone') || '').trim(),
     email: String(fd.get('email') || '').trim().toLowerCase(),
     consent: fd.get('kvkk') === 'on',
-    source: currentLang==='tr' ? 'valerajets.com' : `valerajets.com/${currentLang}`,
+    source: 'valerajets.com',
     status: 'new'
   };
 
@@ -792,7 +792,8 @@ form?.addEventListener('submit', async e => {
 
     if (typeof gtag === 'function') {
       gtag('event', 'generate_lead', {
-        lead_type: 'private_jet_request'
+        lead_type: 'private_jet_request',
+        site_language: currentLang
       });
     }
 
