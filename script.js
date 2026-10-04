@@ -1,312 +1,130 @@
 const menuBtn = document.querySelector('.menu-btn');
 const mobileMenu = document.querySelector('.mobile-menu');
+
 menuBtn?.addEventListener('click', () => {
   const open = mobileMenu.classList.toggle('open');
   menuBtn.setAttribute('aria-expanded', String(open));
 });
-document.querySelectorAll('.mobile-menu a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+document.querySelectorAll('.mobile-menu a').forEach(a => {
+  a.addEventListener('click', () => mobileMenu.classList.remove('open'));
+});
 
 const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
 }, { threshold: 0.13 });
+
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 const form = document.getElementById('quoteForm');
-const steps = [...document.querySelectorAll('.form-step')];
-const progress = [...document.querySelectorAll('.form-progress span')];
 const successBox = document.querySelector('.form-success');
+const formContent = document.querySelector('.single-form-content');
 const formError = document.querySelector('.form-error');
-let currentStep = 0;
-
-function showStep(index){
-  currentStep = index;
-  steps.forEach((step,i)=>step.classList.toggle('active', i===index));
-  progress.forEach((bar,i)=>bar.classList.toggle('active', i<=index));
-  if (formError) formError.hidden = true;
-}
-
-function validateStep(index){
-  const required = [...steps[index].querySelectorAll('[required]')];
-  let ok = true;
-  required.forEach(el => {
-    if (!el.checkValidity()) { el.reportValidity(); ok = false; }
-  });
-  return ok;
-}
-
-document.querySelectorAll('.form-next').forEach(btn => btn.addEventListener('click', () => {
-  if(validateStep(currentStep)) showStep(Math.min(currentStep + 1, steps.length - 1));
-}));
-document.querySelectorAll('.form-back').forEach(btn => btn.addEventListener('click', () => showStep(Math.max(currentStep - 1, 0))));
 
 const tripRadios = document.querySelectorAll('input[name="tripType"]');
 const returnField = document.querySelector('.return-field');
 const returnInput = document.querySelector('input[name="returnDate"]');
-tripRadios.forEach(r => r.addEventListener('change', () => {
-  const round = document.querySelector('input[name="tripType"]:checked').value === 'Gidiş Dönüş';
-  returnField.classList.toggle('hidden', !round);
-  returnInput.required = round;
-  if (!round) returnInput.value = '';
-}));
-
 const dep = document.querySelector('input[name="departure"]');
 const ret = document.querySelector('input[name="returnDate"]');
+
 const today = new Date();
 const yyyy = today.getFullYear();
-const mm = String(today.getMonth()+1).padStart(2,'0');
-const dd = String(today.getDate()).padStart(2,'0');
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const dd = String(today.getDate()).padStart(2, '0');
 const minDate = `${yyyy}-${mm}-${dd}`;
-dep.min = minDate; ret.min = minDate;
-dep.addEventListener('change', ()=> { ret.min = dep.value || minDate; });
 
+if (dep) dep.min = minDate;
+if (ret) ret.min = minDate;
 
-// Airport autocomplete — local data, no third-party API/key required.
+dep?.addEventListener('change', () => {
+  if (ret) ret.min = dep.value || minDate;
+});
+
+tripRadios.forEach(r => r.addEventListener('change', () => {
+  const checked = document.querySelector('input[name="tripType"]:checked');
+  const round = checked?.value === 'Gidiş Dönüş';
+
+  returnField?.classList.toggle('hidden', !round);
+
+  if (returnInput) {
+    returnInput.required = round;
+    if (!round) returnInput.value = '';
+  }
+}));
+
+// Native airport suggestions — reliable on mobile and desktop.
 const airports = Array.isArray(window.VALERA_AIRPORTS) ? window.VALERA_AIRPORTS : [];
-const popularAirportCodes = ['IST','SAW','BJV','LTN','FAB','LBG','NCE','GVA','LIN','JMK','DXB','DWC'];
+const airportOptions = document.getElementById('airportOptions');
 
-function normalizeSearch(value){
+function normalizeSearch(value) {
   return String(value || '')
     .toLocaleLowerCase('tr-TR')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/ı/g, 'i');
+    .replace(/ı/g, 'i')
+    .trim();
 }
 
-function airportLabel(a){ return `${a.city} — ${a.name} (${a.code})`; }
-
-function searchAirports(query){
-  const q = normalizeSearch(query).trim();
-  if (!q) {
-    return popularAirportCodes
-      .map(code => airports.find(a => a.code === code))
-      .filter(Boolean)
-      .slice(0, 8);
-  }
-  if (q.length < 2) return [];
-
-  return airports
-    .map(a => {
-      const code = normalizeSearch(a.code);
-      const city = normalizeSearch(a.city);
-      const name = normalizeSearch(a.name);
-      const country = normalizeSearch(a.country);
-      let score = 0;
-      if (code === q) score += 100;
-      else if (code.startsWith(q)) score += 80;
-      if (city === q) score += 70;
-      else if (city.startsWith(q)) score += 55;
-      else if (city.includes(q)) score += 35;
-      if (name.startsWith(q)) score += 30;
-      else if (name.includes(q)) score += 18;
-      if (country.includes(q)) score += 5;
-      return { a, score };
-    })
-    .filter(x => x.score > 0)
-    .sort((x,y) => y.score - x.score || x.a.city.localeCompare(y.a.city, 'tr'))
-    .slice(0, 8)
-    .map(x => x.a);
+function airportLabel(a) {
+  return `${a.city} — ${a.name} (${a.code})`;
 }
 
-function setupAirportAutocomplete(input, list){
-  if (!input || !list) return;
-  let items = [];
-  let activeIndex = -1;
-  let selecting = false;
+if (airportOptions) {
+  const fragment = document.createDocumentFragment();
 
-  const isMobile = () => window.matchMedia('(max-width: 560px), (pointer: coarse)').matches;
-
-  const close = () => {
-    list.classList.remove('open');
-    input.setAttribute('aria-expanded', 'false');
-    activeIndex = -1;
-  };
-
-  const select = airport => {
-    if (!airport) return;
-    selecting = true;
-    input.value = airportLabel(airport);
-    input.dataset.iata = airport.code;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-    close();
-    window.setTimeout(() => { selecting = false; }, 0);
-  };
-
-  const exactMatch = () => {
-    const raw = String(input.value || '').trim();
-    if (!raw) return null;
-    const q = normalizeSearch(raw);
-    return airports.find(a =>
-      normalizeSearch(a.code) === q ||
-      normalizeSearch(airportLabel(a)) === q
-    ) || null;
-  };
-
-  const render = () => {
-    items = searchAirports(input.value);
-    activeIndex = -1;
-    list.innerHTML = '';
-
-    const hint = document.createElement('div');
-    hint.className = 'airport-hint';
-    hint.textContent = input.value.trim() ? 'Havalimanı seçenekleri' : 'Popüler özel jet rotaları';
-    list.appendChild(hint);
-
-    if (!items.length) {
-      const empty = document.createElement('div');
-      empty.className = 'airport-empty';
-      empty.textContent = 'Eşleşme bulunamadı. Şehir veya havalimanı adını serbestçe yazabilirsiniz.';
-      list.appendChild(empty);
-    } else {
-      items.forEach((airport, index) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'airport-suggestion';
-        button.setAttribute('role', 'option');
-        button.dataset.index = String(index);
-        button.innerHTML = `<span class="airport-code">${airport.code}</span><span class="airport-main"><strong>${airport.city}</strong><small>${airport.name}</small></span><span class="airport-country">${airport.country}</span>`;
-
-        // Desktop: prevent blur before click. Mobile: choose immediately on touch/pointer down.
-        button.addEventListener('pointerdown', e => {
-          e.preventDefault();
-          select(airport);
-        });
-        button.addEventListener('mousedown', e => e.preventDefault());
-        button.addEventListener('click', e => {
-          e.preventDefault();
-          if (!selecting) select(airport);
-        });
-
-        list.appendChild(button);
-      });
-    }
-
-    list.classList.add('open');
-    input.setAttribute('aria-expanded', 'true');
-
-    // On mobile keep the active field visible above the on-screen keyboard.
-    if (isMobile()) {
-      window.setTimeout(() => {
-        input.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      }, 80);
-    }
-  };
-
-  input.addEventListener('focus', render);
-
-  input.addEventListener('input', () => {
-    // Do not wipe the IATA we just set during a programmatic selection.
-    if (!selecting) input.dataset.iata = '';
-    if (!selecting) render();
+  airports.forEach(a => {
+    const option = document.createElement('option');
+    option.value = airportLabel(a);
+    option.label = `${a.code} · ${a.city} · ${a.country}`;
+    fragment.appendChild(option);
   });
 
-  input.addEventListener('blur', () => {
-    window.setTimeout(() => {
-      if (selecting) return;
-      const match = exactMatch();
-      if (match) {
-        input.value = airportLabel(match);
-        input.dataset.iata = match.code;
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-      close();
-    }, isMobile() ? 260 : 140);
-  });
-
-  input.addEventListener('keydown', e => {
-    const buttons = [...list.querySelectorAll('.airport-suggestion')];
-    if (!list.classList.contains('open') && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) render();
-    if (!buttons.length) return;
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      activeIndex = (activeIndex + 1) % buttons.length;
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      activeIndex = (activeIndex - 1 + buttons.length) % buttons.length;
-    } else if (e.key === 'Enter') {
-      const chosen = activeIndex >= 0 ? items[activeIndex] : (items.length === 1 ? items[0] : exactMatch());
-      if (chosen) {
-        e.preventDefault();
-        select(chosen);
-      }
-      return;
-    } else if (e.key === 'Escape') {
-      close();
-      return;
-    } else {
-      return;
-    }
-
-    buttons.forEach((b,i) => b.classList.toggle('active', i === activeIndex));
-    buttons[activeIndex]?.scrollIntoView({ block: 'nearest' });
-  });
+  airportOptions.appendChild(fragment);
 }
 
-setupAirportAutocomplete(document.querySelector('input[name="from"]'), document.getElementById('originSuggestions'));
-setupAirportAutocomplete(document.querySelector('input[name="to"]'), document.getElementById('destinationSuggestions'));
-setupAirportAutocomplete(document.getElementById('quickFrom'), document.getElementById('quickOriginSuggestions'));
-setupAirportAutocomplete(document.getElementById('quickTo'), document.getElementById('quickDestinationSuggestions'));
+function resolveAirportInput(input) {
+  if (!input) return;
 
-// Hero "Hızlı Talep" alanı: seçimleri ana teklif formuna aktarır.
-const quickFrom = document.getElementById('quickFrom');
-const quickTo = document.getElementById('quickTo');
-const quickTripType = document.getElementById('quickTripType');
-const quickPassengers = document.getElementById('quickPassengers');
-const quickDeparture = document.getElementById('quickDeparture');
-const quickQuoteBtn = document.getElementById('quickQuoteBtn');
-const quickFormError = document.getElementById('quickFormError');
-
-if (quickDeparture) quickDeparture.min = minDate;
-
-quickQuoteBtn?.addEventListener('click', () => {
-  const fromValue = String(quickFrom?.value || '').trim();
-  const toValue = String(quickTo?.value || '').trim();
-  const departureValue = String(quickDeparture?.value || '').trim();
-
-  if (!fromValue || !toValue || !departureValue) {
-    if (quickFormError) quickFormError.hidden = false;
+  const raw = String(input.value || '').trim();
+  if (!raw) {
+    input.dataset.iata = '';
     return;
   }
 
-  if (quickFormError) quickFormError.hidden = true;
+  const q = normalizeSearch(raw);
 
-  const mainFrom = document.querySelector('input[name="from"]');
-  const mainTo = document.querySelector('input[name="to"]');
-  const mainPassengers = document.querySelector('input[name="passengers"]');
-  const mainDeparture = document.querySelector('input[name="departure"]');
+  let match = airports.find(a =>
+    normalizeSearch(a.code) === q ||
+    normalizeSearch(airportLabel(a)) === q
+  );
 
-  if (mainFrom) {
-    mainFrom.value = fromValue;
-    mainFrom.dataset.iata = quickFrom?.dataset.iata || '';
-  }
-  if (mainTo) {
-    mainTo.value = toValue;
-    mainTo.dataset.iata = quickTo?.dataset.iata || '';
-  }
-  if (mainPassengers) mainPassengers.value = quickPassengers?.value || '4';
-  if (mainDeparture) {
-    mainDeparture.value = departureValue;
-    mainDeparture.dispatchEvent(new Event('change', { bubbles: true }));
+  // If the user typed a unique airport name, format it automatically.
+  if (!match) {
+    const matches = airports.filter(a =>
+      normalizeSearch(a.name) === q ||
+      normalizeSearch(`${a.city} ${a.name}`) === q
+    );
+    if (matches.length === 1) match = matches[0];
   }
 
-  const selectedTrip = quickTripType?.value || 'Tek Yön';
-  const matchingTripRadio = [...tripRadios].find(r => r.value === selectedTrip);
-  if (matchingTripRadio) {
-    matchingTripRadio.checked = true;
-    matchingTripRadio.dispatchEvent(new Event('change', { bubbles: true }));
+  if (match) {
+    input.value = airportLabel(match);
+    input.dataset.iata = match.code;
+  } else {
+    input.dataset.iata = '';
   }
+}
 
-  showStep(0);
-  document.getElementById('teklif')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  setTimeout(() => {
-    document.querySelector('input[name="departureTime"]')?.focus({ preventScroll: true });
-  }, 650);
+document.querySelectorAll('input[list="airportOptions"]').forEach(input => {
+  input.addEventListener('change', () => resolveAirportInput(input));
+  input.addEventListener('blur', () => resolveAirportInput(input));
 });
 
-function getSupabaseConfig(){
+function getSupabaseConfig() {
   const config = window.VALERA_SUPABASE || {};
+
   const configured =
     typeof config.url === 'string' &&
     config.url.startsWith('https://') &&
@@ -318,25 +136,33 @@ function getSupabaseConfig(){
   return configured ? config : null;
 }
 
-function showError(message){
+function showError(message) {
   if (!formError) return;
+
   formError.textContent = message;
   formError.hidden = false;
   formError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function showSuccess(){
-  steps.forEach(s => s.style.display = 'none');
-  document.querySelector('.form-progress').style.display = 'none';
+function showSuccess() {
   if (formError) formError.hidden = true;
-  successBox.hidden = false;
+  if (formContent) formContent.hidden = true;
+  if (successBox) successBox.hidden = false;
 }
 
-form?.addEventListener('submit', async (e) => {
+form?.addEventListener('submit', async e => {
   e.preventDefault();
-  if(!validateStep(currentStep)) return;
+
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+
+  resolveAirportInput(form.querySelector('input[name="from"]'));
+  resolveAirportInput(form.querySelector('input[name="to"]'));
 
   const config = getSupabaseConfig();
+
   if (!config) {
     showError('Form bağlantısı henüz yapılandırılmadı. Lütfen daha sonra tekrar deneyin.');
     console.error('Supabase configuration is missing. Check supabase-config.js.');
@@ -345,13 +171,15 @@ form?.addEventListener('submit', async (e) => {
 
   const submitButton = form.querySelector('button[type="submit"]');
   const originalButtonHtml = submitButton.innerHTML;
+
   submitButton.disabled = true;
   submitButton.textContent = 'Gönderiliyor...';
+
   if (formError) formError.hidden = true;
 
   const fd = new FormData(form);
 
-  // Basit bot tuzağı. Normal kullanıcı bu alanı görmez/doldurmaz.
+  // Honeypot: bots may fill this hidden field.
   if ((fd.get('website') || '').trim()) {
     showSuccess();
     submitButton.disabled = false;
@@ -381,22 +209,28 @@ form?.addEventListener('submit', async (e) => {
     const response = await fetch(`${config.url}/rest/v1/flight_requests`, {
       method: 'POST',
       headers: {
-        'apikey': config.publishableKey,
+        apikey: config.publishableKey,
         'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
+        Prefer: 'return=minimal'
       },
       body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
       let detail = '';
-      try { detail = JSON.stringify(await response.json()); } catch (_) {}
+      try {
+        detail = JSON.stringify(await response.json());
+      } catch (_) {}
+
       throw new Error(`Supabase ${response.status}: ${detail}`);
     }
 
     if (typeof gtag === 'function') {
-      gtag('event', 'generate_lead', { lead_type: 'private_jet_request' });
+      gtag('event', 'generate_lead', {
+        lead_type: 'private_jet_request'
+      });
     }
+
     showSuccess();
   } catch (error) {
     console.error('Valera Jets lead submit failed:', error);
@@ -409,9 +243,20 @@ form?.addEventListener('submit', async (e) => {
 
 document.querySelector('.reset-form')?.addEventListener('click', () => {
   form.reset();
-  successBox.hidden = true;
-  document.querySelector('.form-progress').style.display = 'flex';
-  steps.forEach(s => s.style.display = '');
-  returnField.classList.add('hidden');
-  showStep(0);
+
+  if (successBox) successBox.hidden = true;
+  if (formContent) formContent.hidden = false;
+  if (formError) formError.hidden = true;
+
+  returnField?.classList.add('hidden');
+
+  if (returnInput) {
+    returnInput.required = false;
+    returnInput.value = '';
+  }
+
+  if (dep) dep.min = minDate;
+  if (ret) ret.min = minDate;
+
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
