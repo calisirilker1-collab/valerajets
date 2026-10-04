@@ -146,3 +146,31 @@
   .quick-flight-meta{grid-template-columns:1fr 1fr}
   .quick-flight-meta .quick-meta-field:last-child{grid-column:1/-1}
 }
+
+
+/* Single quote form v1 */
+.hero-card-static{align-self:end;margin-bottom:82px}
+.static-card-copy{padding:28px 0 24px;border-bottom:1px solid var(--line)}
+.static-card-copy small{display:block;color:#8e979f;font-size:10px;text-transform:uppercase;letter-spacing:.12em}
+.static-card-copy h3{font:500 24px/1.25 var(--font-display);margin:12px 0;color:#fff}
+.static-card-copy p{margin:0;color:#8e969e;font-size:13px;line-height:1.7}
+.static-card-points{display:grid;grid-template-columns:1fr;gap:8px;padding:20px 0;color:#c3c8cd;font-size:11px}
+.single-quote-form{min-height:0}
+.single-form-head{padding-bottom:22px;border-bottom:1px solid #d9d4ca;margin-bottom:24px}
+.single-form-head p{margin:7px 0 0;color:#777e84;font-size:12px}
+.single-form-section{padding:0 0 26px;margin:0 0 26px;border-bottom:1px solid #d9d4ca}
+.single-form-section-title{font:600 10px var(--font-display);letter-spacing:.13em;text-transform:uppercase;color:#8e7650;margin-bottom:17px}
+.single-form-submit{display:flex;align-items:center;justify-content:space-between;gap:22px}
+.single-form-submit small{color:#7a8085;font-size:10px}
+.single-form-submit .btn{min-width:170px}
+.single-quote-form input[list]{appearance:auto}
+.single-quote-form datalist{display:none}
+@media(max-width:900px){
+  .hero-card-static{margin:0;max-width:500px}
+}
+@media(max-width:560px){
+  .single-form-submit{align-items:stretch;flex-direction:column}
+  .single-form-submit .btn{width:100%}
+  .single-quote-form{padding:24px 18px}
+  .static-card-copy h3{font-size:21px}
+}
