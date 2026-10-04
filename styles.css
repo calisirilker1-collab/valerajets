@@ -600,3 +600,27 @@
   .smart-request-actions{align-items:stretch;flex-direction:column}
   .smart-request-actions .btn{width:100%}
 }
+
+
+/* Language selector */
+.language-picker{flex:0 0 auto}
+.language-select{
+  height:40px;
+  min-width:62px;
+  padding:0 26px 0 12px;
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:999px;
+  outline:none;
+  background:rgba(7,10,14,.24);
+  color:#fff;
+  font:600 11px var(--font-body);
+  letter-spacing:.08em;
+  cursor:pointer;
+  color-scheme:dark;
+}
+.language-select:hover,.language-select:focus{border-color:rgba(255,255,255,.62)}
+.language-select option{background:#11161d;color:#fff}
+@media(max-width:900px){
+  .language-picker{margin-left:auto}
+  .language-select{height:36px;min-width:58px;padding-left:10px}
+}
